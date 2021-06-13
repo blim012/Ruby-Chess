@@ -1,8 +1,8 @@
 require './lib/chessboard.rb'
 
 game = Chessboard.new
-game.print_knight_moves_at_square(27)
+game.print_king_moves_at_square(14)
 
 puts ''
 
-game.print_knight_moves_at_square(56)
+game.print_king_moves_at_square(63)

@@ -5,7 +5,7 @@ class Chessboard
   attr_reader :ray_attacks
 
   def initialize
-    # initialize bitboards
+    # initialize piece bitboards
     @w_pawn = 0x000000000000FF00
     @w_bishop = 0x0000000000000024
     @w_knight = 0x0000000000000042
@@ -22,16 +22,33 @@ class Chessboard
 
     # can probably move the attacks/attack_from into classes
 
-    # pre-calculate all possible movement for all pieces for all squares
-    # @*_attacks[8][64], 8 directions, 64 squares
+    # generate attack (pseudo-legal move) bitboards
     @ray_attacks = gen_ray_attacks
     @knight_attacks = gen_knight_attacks
-    #@king_attacks = gen_king_attacks
+    @king_attacks = gen_king_attacks
     #@pawn_attacks = gen_pawn_attacks
 
     # I think we have to update attack_from every single turn for both players
 
     @prev_move = nil
+  end
+
+  def print_king_moves_at_square(square_index)
+    king_moves = @king_attacks[square_index]
+    square = 0x8000000000000000
+    8.times do
+      8.times do
+        case
+        when ((square & king_moves) != 0)
+          print '.'
+        else
+          print '-'
+        end
+        square >>= 1
+        print ' '
+      end
+      puts ''
+    end
   end
 
   def print_knight_moves_at_square(square_index)

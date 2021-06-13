@@ -95,6 +95,52 @@ module Piece_Moves
     knight_attacks
   end
 
+  def gen_king_attacks
+    board_bounds = get_board_bounds
+
+    # This offset is added to the indices of board_bounds to account for
+    # the sentinel values
+    sentinel_offset = 2
+
+    # Used to shift a bit into a king bitboard
+    # Its offset is determined by the values in the board_bounds array to
+    # properly set the king bitboard
+    shift = 63
+
+    # Return value
+    king_attacks = []
+
+    8.times do |i|
+      8.times do |j|
+        king_bitboard = 0
+        x = sentinel_offset + i
+        y = sentinel_offset + j
+
+        nw_shift_offset = board_bounds[x - 1][y - 1]
+        n_shift_offset = board_bounds[x][y - 1]
+        ne_shift_offset = board_bounds[x + 1][y - 1]
+        e_shift_offset = board_bounds[x + 1][y]
+        se_shift_offset = board_bounds[x + 1][y + 1]
+        s_shift_offset = board_bounds[x][y + 1]
+        sw_shift_offset = board_bounds[x - 1][y + 1]
+        w_shift_offset = board_bounds[x - 1][y]
+
+        king_bitboard |= (1 << (shift - nw_shift_offset)) unless nw_shift_offset.nil?
+        king_bitboard |= (1 << (shift - n_shift_offset)) unless n_shift_offset.nil?
+        king_bitboard |= (1 << (shift - ne_shift_offset)) unless ne_shift_offset.nil?
+        king_bitboard |= (1 << (shift - e_shift_offset)) unless e_shift_offset.nil?
+        king_bitboard |= (1 << (shift - se_shift_offset)) unless se_shift_offset.nil?
+        king_bitboard |= (1 << (shift - s_shift_offset)) unless s_shift_offset.nil?
+        king_bitboard |= (1 << (shift - sw_shift_offset)) unless sw_shift_offset.nil?
+        king_bitboard |= (1 << (shift - w_shift_offset)) unless w_shift_offset.nil?
+
+        king_attacks.push(king_bitboard)
+      end
+    end
+
+    king_attacks
+  end
+
   private
 
   def gen_directional_rays(x_move, y_move)

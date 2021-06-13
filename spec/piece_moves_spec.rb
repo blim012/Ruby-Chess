@@ -1,9 +1,9 @@
 require './lib/piece_moves.rb'
 
 describe Piece_Moves do
-  context 'when generating pseudo-legal piece moves' do
-    let(:dummy_chessboard) { Class.new { include Piece_Moves } }
+  let(:dummy_chessboard) { Class.new { include Piece_Moves } }
 
+  context 'when generating pseudo-legal piece moves' do
     describe '#gen_ray_attacks' do
       subject(:ray_piece_moves) { dummy_chessboard.new }
 
@@ -66,7 +66,7 @@ describe Piece_Moves do
     describe '#gen_knight_attacks' do
       subject(:knight_piece_moves) { dummy_chessboard.new }
 
-      it 'generates moves properly in all possible direction' do
+      it 'generates moves properly in all possible directions' do
         index_for_d5 = 27
         knight_moves = knight_piece_moves.gen_knight_attacks
         knight_at_d5 = knight_moves[index_for_d5]
@@ -80,6 +80,26 @@ describe Piece_Moves do
         knight_at_a1 = knight_moves[index_for_a1]
 
         expect(knight_at_a1).to eq(0x402000)
+      end
+    end
+
+    describe '#gen_king_attacks' do
+      subject(:king_piece_moves) { dummy_chessboard.new }
+
+      it 'generates moves properly in all possible directions' do
+        index_for_g7 = 14
+        king_moves = king_piece_moves.gen_king_attacks
+        king_at_g7 = king_moves[index_for_g7]
+
+        expect(king_at_g7).to eq(0x705070000000000)
+      end
+
+      it 'does not generate moves out of bounds' do
+        index_for_h1 = 63
+        king_moves = king_piece_moves.gen_king_attacks
+        king_at_h1 = king_moves[index_for_h1]
+
+        expect(king_at_h1).to eq(0x302)
       end
     end
   end
