@@ -141,6 +141,10 @@ module Piece_Moves
     king_attacks
   end
 
+  def gen_w_pawn_attacks
+
+  end
+
   private
 
   def gen_directional_rays(x_move, y_move)

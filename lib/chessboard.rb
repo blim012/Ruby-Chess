@@ -26,7 +26,8 @@ class Chessboard
     @ray_attacks = gen_ray_attacks
     @knight_attacks = gen_knight_attacks
     @king_attacks = gen_king_attacks
-    #@pawn_attacks = gen_pawn_attacks
+    #@w_pawn_attacks = gen_w_pawn_attacks
+    #@b_pawn_attacks = gen_b_pawn_attacks
 
     # I think we have to update attack_from every single turn for both players
 

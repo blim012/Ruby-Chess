@@ -102,5 +102,33 @@ describe Piece_Moves do
         expect(king_at_h1).to eq(0x302)
       end
     end
+
+    describe '#gen_w_pawn_attacks' do
+      subject(:w_pawn_piece_moves) { dummy_chessboard.new }
+
+      it 'generates moves properly in all possible directions' do
+        index_for_e3 = 44
+        w_pawn_moves = w_pawn_piece_moves.gen_w_pawn_attacks
+        w_pawn_at_e3 = w_pawn_moves[index_for_e3]
+
+        expect(w_pawn_at_e3).to eq(0x1C000000)
+      end
+
+      it 'allows pawns to move two spaces forward if they are on their starting square' do
+        index_for_a2 = 48
+        w_pawn_moves = w_pawn_piece_moves.gen_w_pawn_attacks
+        w_pawn_at_a2 = w_pawn_moves[index_for_a2]
+
+        expect(w_pawn_at_a2).to eq(0x80C00000)
+      end
+
+      it 'does not generate moves out of bounds' do
+        index_for_a8 = 0
+        w_pawn_moves = w_pawn_piece_moves.gen_w_pawn_attacks
+        w_pawn_at_a8 = w_pawn_moves[index_for_a8]
+
+        expect(w_pawn_at_a8).to eq(0)
+      end
+    end
   end
 end
