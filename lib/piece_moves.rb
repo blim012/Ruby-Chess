@@ -35,6 +35,66 @@ module Piece_Moves
     ray_attacks
   end
 
+  def gen_knight_attacks
+    board_bounds = get_board_bounds
+
+    # This offset is added to the indices of board_bounds to account for
+    # the sentinel values
+    sentinel_offset = 2
+
+    # Used to shift a bit into a knight bitboard
+    # Its offset is determined by the values in the board_bounds array to
+    # properly set the knight bitboard
+    shift = 63
+
+    # Return value
+    knight_attacks = []
+
+    8.times do |i|
+      8.times do |j|
+        x = sentinel_offset + i
+        y = sentinel_offset + j
+        shift_offset_y_plus_2 = board_bounds[x][y + 2]
+        shift_offset_x_plus_2 = board_bounds[x + 2][y]
+        shift_offset_y_minus_2 = board_bounds[x][y - 2]
+        shift_offset_x_minus_2 = board_bounds[x - 2][y]
+        knight_bitboard = 0
+        
+        unless shift_offset_y_plus_2.nil?
+          shift_offset = board_bounds[x - 1][y + 2]
+          knight_bitboard |= (1 << (shift - shift_offset)) unless shift_offset.nil?
+          shift_offset = board_bounds[x + 1][y + 2]
+          knight_bitboard |= (1 << (shift - shift_offset)) unless shift_offset.nil?
+        end
+
+        unless shift_offset_x_plus_2.nil?
+          shift_offset = board_bounds[x + 2][y - 1]
+          knight_bitboard |= (1 << (shift - shift_offset)) unless shift_offset.nil?
+          shift_offset = board_bounds[x + 2][y + 1]
+          knight_bitboard |= (1 << (shift - shift_offset)) unless shift_offset.nil?
+        end
+
+        unless shift_offset_y_minus_2.nil?
+          shift_offset = board_bounds[x - 1][y - 2]
+          knight_bitboard |= (1 << (shift - shift_offset)) unless shift_offset.nil?
+          shift_offset = board_bounds[x + 1][y - 2]
+          knight_bitboard |= (1 << (shift - shift_offset)) unless shift_offset.nil?
+        end
+
+        unless shift_offset_x_minus_2.nil?
+          shift_offset = board_bounds[x - 2][y - 1]
+          knight_bitboard |= (1 << (shift - shift_offset)) unless shift_offset.nil?
+          shift_offset = board_bounds[x - 2][y + 1]
+          knight_bitboard |= (1 << (shift - shift_offset)) unless shift_offset.nil?
+        end
+
+        knight_attacks.push(knight_bitboard)
+      end
+    end
+
+    knight_attacks
+  end
+
   private
 
   def gen_directional_rays(x_move, y_move)
@@ -54,16 +114,16 @@ module Piece_Moves
 
     8.times do |i|
       8.times do |j|
-        ray = 0
+        ray_bitboard = 0
         square = [i + sentinel_offset, j + sentinel_offset] # [x, y]
         loop do
           square[0] += x_move
           square[1] += y_move
           shift_offset = board_bounds[square[0]][square[1]]
           break if shift_offset.nil?
-          ray |= (1 << (shift - shift_offset))
+          ray_bitboard |= (1 << (shift - shift_offset))
         end
-        directional_rays.push(ray)
+        directional_rays.push(ray_bitboard)
       end
     end
 

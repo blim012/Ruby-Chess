@@ -25,13 +25,31 @@ class Chessboard
     # pre-calculate all possible movement for all pieces for all squares
     # @*_attacks[8][64], 8 directions, 64 squares
     @ray_attacks = gen_ray_attacks
-    #@knight_attacks = init_knight_attacks
-    #@king_attacks = init_king_attacks
-    #@pawn_attacks = init_pawn_attacks
+    @knight_attacks = gen_knight_attacks
+    #@king_attacks = gen_king_attacks
+    #@pawn_attacks = gen_pawn_attacks
 
     # I think we have to update attack_from every single turn for both players
 
     @prev_move = nil
+  end
+
+  def print_knight_moves_at_square(square_index)
+    knight_moves = @knight_attacks[square_index]
+    square = 0x8000000000000000
+    8.times do
+      8.times do
+        case
+        when ((square & knight_moves) != 0)
+          print '.'
+        else
+          print '-'
+        end
+        square >>= 1
+        print ' '
+      end
+      puts ''
+    end
   end
 
   def print_rays_at_square(square_index)
