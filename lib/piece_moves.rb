@@ -142,42 +142,23 @@ module Piece_Moves
   end
 
   def gen_w_pawn_attacks
-    board_bounds = get_board_bounds
-    sentinel_offset = 2
-    shift = 63
-    w_pawn_attacks = []
-
-    8.times do |i| 
-      8.times do |j|
-        pawn_bitboard = 0
-        row = sentinel_offset + i
-        column = sentinel_offset + j
-
-        nw_shift_offset = board_bounds[row - 1][column - 1]
-        n_shift_offset = board_bounds[row - 1][column]
-        ne_shift_offset = board_bounds[row - 1][column + 1]
-
-        if i == 6 # starting row for white pawns
-          n_two_shift_offset = board_bounds[row - 2][column]
-          pawn_bitboard |= (1 << (shift - n_two_shift_offset))
-        end
-
-        pawn_bitboard |= (1 << (shift - nw_shift_offset)) unless nw_shift_offset.nil?
-        pawn_bitboard |= (1 << (shift - n_shift_offset)) unless n_shift_offset.nil?
-        pawn_bitboard |= (1 << (shift - ne_shift_offset)) unless ne_shift_offset.nil? 
-        
-        w_pawn_attacks.push(pawn_bitboard)
-      end
-    end
-
-    w_pawn_attacks
+    gen_pawn_attacks('white')
   end
 
   def gen_b_pawn_attacks
+    gen_pawn_attacks('black')
+  end
+
+  private
+
+  def gen_pawn_attacks(color)
+    row_offset = (color === 'white' ? -1 : 1)
+    starting_row = (color === 'white' ? 6 : 1)
+
     board_bounds = get_board_bounds
     sentinel_offset = 2
     shift = 63
-    b_pawn_attacks = []
+    pawn_attacks = []
 
     8.times do |i| 
       8.times do |j|
@@ -185,12 +166,12 @@ module Piece_Moves
         row = sentinel_offset + i
         column = sentinel_offset + j
 
-        nw_shift_offset = board_bounds[row + 1][column - 1]
-        n_shift_offset = board_bounds[row + 1][column]
-        ne_shift_offset = board_bounds[row + 1][column + 1]
+        nw_shift_offset = board_bounds[row + row_offset][column - 1]
+        n_shift_offset = board_bounds[row + row_offset][column]
+        ne_shift_offset = board_bounds[row + row_offset][column + 1]
 
-        if i == 1 # starting row for white pawns
-          n_two_shift_offset = board_bounds[row + 2][column]
+        if i == starting_row
+          n_two_shift_offset = board_bounds[row + (row_offset * 2)][column]
           pawn_bitboard |= (1 << (shift - n_two_shift_offset))
         end
 
@@ -198,14 +179,12 @@ module Piece_Moves
         pawn_bitboard |= (1 << (shift - n_shift_offset)) unless n_shift_offset.nil?
         pawn_bitboard |= (1 << (shift - ne_shift_offset)) unless ne_shift_offset.nil? 
         
-        b_pawn_attacks.push(pawn_bitboard)
+        pawn_attacks.push(pawn_bitboard)
       end
     end
 
-    b_pawn_attacks
+    pawn_attacks
   end
-
-  private
 
   def gen_directional_rays(x_move, y_move)
     board_bounds = get_board_bounds
