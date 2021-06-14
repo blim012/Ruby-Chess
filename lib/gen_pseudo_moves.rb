@@ -1,6 +1,7 @@
 # Generates all possible moves for a piece, assuming that
 # the piece is the only piece on the board.
 # This data is preloaded before the game begins
+
 module Gen_Pseudo_Moves
   # Ray directions
   NORTH_WEST = 0
