@@ -1,7 +1,7 @@
-require './lib/piece_moves.rb'
+require './lib/gen_pseudo_moves.rb'
 
 class Chessboard
-  include Piece_Moves
+  include Gen_Pseudo_Moves
   attr_reader :ray_attacks
 
   def initialize
@@ -26,8 +26,8 @@ class Chessboard
     @ray_attacks = gen_ray_attacks
     @knight_attacks = gen_knight_attacks
     @king_attacks = gen_king_attacks
-    #@w_pawn_attacks = gen_w_pawn_attacks
-    #@b_pawn_attacks = gen_b_pawn_attacks
+    @w_pawn_attacks = gen_w_pawn_attacks
+    @b_pawn_attacks = gen_b_pawn_attacks
 
     # I think we have to update attack_from every single turn for both players
 

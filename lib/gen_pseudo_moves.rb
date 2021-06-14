@@ -1,4 +1,4 @@
-module Piece_Moves
+module Gen_Pseudo_Moves
   # Ray directions
   NORTH_WEST = 0
   NORTH = 1
