@@ -15,13 +15,13 @@ module Piece_Moves
     ray_attacks = []
 
     nw_ray_attacks = gen_directional_rays(-1, -1)
-    n_ray_attacks = gen_directional_rays(0, -1)
-    ne_ray_attacks = gen_directional_rays(1, -1)
-    e_ray_attacks = gen_directional_rays(1, 0)
+    n_ray_attacks = gen_directional_rays(-1, 0)
+    ne_ray_attacks = gen_directional_rays(-1, 1)
+    e_ray_attacks = gen_directional_rays(0, 1)
     se_ray_attacks = gen_directional_rays(1, 1)
-    s_ray_attacks = gen_directional_rays(0, 1)
-    sw_ray_attacks = gen_directional_rays(-1, 1)
-    w_ray_attacks = gen_directional_rays(-1, 0)
+    s_ray_attacks = gen_directional_rays(1, 0)
+    sw_ray_attacks = gen_directional_rays(1, -1)
+    w_ray_attacks = gen_directional_rays(0, -1)
 
     ray_attacks.push(nw_ray_attacks)
     ray_attacks.push(n_ray_attacks)
@@ -186,7 +186,7 @@ module Piece_Moves
     pawn_attacks
   end
 
-  def gen_directional_rays(x_move, y_move)
+  def gen_directional_rays(row_offset, column_offset)
     board_bounds = get_board_bounds
 
     # This offset is added to the indices of board_bounds to account for
@@ -204,11 +204,12 @@ module Piece_Moves
     8.times do |i|
       8.times do |j|
         ray_bitboard = 0
-        square = [i + sentinel_offset, j + sentinel_offset] # [x, y]
+        row = sentinel_offset + i
+        column = sentinel_offset + j
         loop do
-          square[0] += x_move
-          square[1] += y_move
-          shift_offset = board_bounds[square[0]][square[1]]
+          row += row_offset
+          column += column_offset
+          shift_offset = board_bounds[row][column]
           break if shift_offset.nil?
           ray_bitboard |= (1 << (shift - shift_offset))
         end

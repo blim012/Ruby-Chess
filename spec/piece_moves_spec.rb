@@ -17,6 +17,72 @@ describe Piece_Moves do
       SOUTH_WEST = 6
       WEST = 7
 
+      context 'when generating a ray in a specific direction' do
+        it 'generates northwest rays correctly' do
+          index_for_e3 = 44
+          rays = ray_piece_moves.gen_ray_attacks
+          northwest_e3_ray = rays[NORTH_WEST][index_for_e3]
+
+          expect(northwest_e3_ray).to eq(0x80402010000000)
+        end
+
+        it 'generates north rays correctly' do
+          index_for_e3 = 44
+          rays = ray_piece_moves.gen_ray_attacks
+          north_e3_ray = rays[NORTH][index_for_e3]
+
+          expect(north_e3_ray).to eq(0x0808080808000000)
+        end
+
+        it 'generates northeast rays correctly' do
+          index_for_e3 = 44
+          rays = ray_piece_moves.gen_ray_attacks
+          northeast_e3_ray = rays[NORTH_EAST][index_for_e3]
+
+          expect(northeast_e3_ray).to eq(0x0000010204000000)
+        end
+
+        it 'generates east rays correctly' do
+          index_for_e3 = 44
+          rays = ray_piece_moves.gen_ray_attacks
+          east_e3_ray = rays[EAST][index_for_e3]
+
+          expect(east_e3_ray).to eq(0x070000)
+        end
+
+        it 'generates southeast rays correctly' do
+          index_for_e3 = 44
+          rays = ray_piece_moves.gen_ray_attacks
+          southeast_e3_ray = rays[SOUTH_EAST][index_for_e3]
+
+          expect(southeast_e3_ray).to eq(0x0402)
+        end
+
+        it 'generates south rays correctly' do
+          index_for_e3 = 44
+          rays = ray_piece_moves.gen_ray_attacks
+          south_e3_ray = rays[SOUTH][index_for_e3]
+
+          expect(south_e3_ray).to eq(0x0808)
+        end
+
+        it 'generates southwest rays correctly' do
+          index_for_e3 = 44
+          rays = ray_piece_moves.gen_ray_attacks
+          southwest_e3_ray = rays[SOUTH_WEST][index_for_e3]
+
+          expect(southwest_e3_ray).to eq(0x1020)
+        end
+
+        it 'generates west rays correctly' do
+          index_for_e3 = 44
+          rays = ray_piece_moves.gen_ray_attacks
+          west_e3_ray = rays[WEST][index_for_e3]
+
+          expect(west_e3_ray).to eq(0xF00000)
+        end
+      end
+
       it 'generates rays in all possible directions' do
         index_for_d4 = 35
         rays = ray_piece_moves.gen_ray_attacks
