@@ -2,6 +2,7 @@
 # the piece is the only piece on the board.
 # This data is preloaded before the game begins
 
+# rename to Pseudo_Moves and make a class
 module Gen_Pseudo_Moves
   # Ray directions
   NORTH_WEST = 0

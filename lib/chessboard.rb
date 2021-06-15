@@ -47,6 +47,8 @@ class Chessboard
     @b_pawn_attacks = gen_b_pawn_attacks
 
     @prev_move = nil
+
+    #We only need to update the legal RAY attacks after each piece move.
   end
 
   # move: { 
