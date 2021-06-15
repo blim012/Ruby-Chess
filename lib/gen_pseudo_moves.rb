@@ -2,18 +2,8 @@
 # the piece is the only piece on the board.
 # This data is preloaded before the game begins
 
-# rename to Pseudo_Moves and make a class
+# rename to Preload_Moves and make a class
 module Gen_Pseudo_Moves
-  # Ray directions
-  NORTH_WEST = 0
-  NORTH = 1
-  NORTH_EAST = 2
-  EAST = 3
-  SOUTH_EAST = 4
-  SOUTH = 5
-  SOUTH_WEST = 6
-  WEST = 7
-
   def gen_ray_attacks
     # returned as the container of all ray attacks
     # format: ray_attacks[8][64] for 8 directions and 64 squares

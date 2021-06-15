@@ -1,7 +1,9 @@
 require './lib/gen_pseudo_moves.rb'
+require './lib/ray_attack.rb'
 
 class Chessboard
   include Gen_Pseudo_Moves
+  include Ray_Attack
 
   attr_accessor :piece_BB, :color_BB, :occupied_BB
 
@@ -15,7 +17,7 @@ class Chessboard
     @piece_BB[:queen] = 0x0000000000000010 | 0x1000000000000000 
     @piece_BB[:king] = 0x0000000000000008 | 0x0800000000000000 
 
-    #initialize color bitboards
+    # initialize color bitboards
     @color_BB = {}
     @color_BB[:white] = 0x000000000000FF00 |
                         0x0000000000000024 |
@@ -31,7 +33,7 @@ class Chessboard
                         0x1000000000000000 |
                         0x0800000000000000
 
-    #initialize occupied space bitboard
+    # initialize occupied space bitboard
     @occupied_BB = @piece_BB[:pawn] |
                    @piece_BB[:bishop] |
                    @piece_BB[:knight] |
@@ -39,8 +41,10 @@ class Chessboard
                    @piece_BB[:queen] |
                    @piece_BB[:king]
     
-    # generate attack (pseudo-legal move) bitboards
-    @ray_attacks = gen_ray_attacks
+    # generate pseudo-legal bitboards ray attacks
+    @pseudo_ray_attacks = gen_ray_attacks
+
+    # generate non-ray attack bitboards
     @knight_attacks = gen_knight_attacks
     @king_attacks = gen_king_attacks
     @w_pawn_attacks = gen_w_pawn_attacks
