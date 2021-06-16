@@ -1,17 +1,12 @@
 require './lib/chessboard.rb'
+require './lib/move.rb'
 
 describe Chessboard do
   describe '#make_move' do
     subject(:make_move_board) { described_class.new }
 
     it 'performs a quiet move' do
-      move = {}
-      move[:from_offset] = 42 # offset for the starting square, C3
-      move[:to_offset] = 21 # offset for the destination square, F6
-      move[:piece] = :bishop # piece to move
-      move[:color] = :white # color of piece to move
-      move[:cap_piece] = nil # piece to be captured, if any
-      move[:cap_color] = nil # color of piece to move, if any
+      move = Move.new(42, 21, :bishop, :white)
 
       make_move_board.piece_BB[:bishop] = 0x0000000000200000 # bishop on C3
       make_move_board.color_BB[:white] = 0x0000000000200000
@@ -22,13 +17,7 @@ describe Chessboard do
     end
 
     it 'updates the occupied bitboard on a quiet move' do
-      move = {}
-      move[:from_offset] = 42 # offset for the starting square, C3
-      move[:to_offset] = 21 # offset for the destination square, F6
-      move[:piece] = :bishop # piece to move
-      move[:color] = :white # color of piece to move
-      move[:cap_piece] = nil # piece to be captured, if any
-      move[:cap_color] = nil # color of piece to move, if any
+      move = Move.new(42, 21, :bishop, :white)
 
       make_move_board.piece_BB[:bishop] = 0x0000000000200000 # bishop on C3
       make_move_board.color_BB[:white] = 0x0000000000200000
@@ -44,13 +33,7 @@ describe Chessboard do
     end
 
     it 'performs a capture' do
-      move = {}
-      move[:from_offset] = 19 # offset for the starting square, D6
-      move[:to_offset] = 51 # offset for the destination square, D2
-      move[:piece] = :rook # piece to move
-      move[:color] = :black # color of piece to move
-      move[:cap_piece] = :pawn # piece to be captured, if any
-      move[:cap_color] = :white #color of piece to move, if any
+      move = Move.new(19, 51, :rook, :black, :pawn, :white)
 
       make_move_board.piece_BB[:rook] = 0x0000100000000000 # rook on D6
       make_move_board.color_BB[:black] = 0x0000100000000000
@@ -64,13 +47,7 @@ describe Chessboard do
     end
 
     it 'updates the occupied bitboard on a capture' do
-      move = {}
-      move[:from_offset] = 19 # offset for the starting square, D6
-      move[:to_offset] = 51 # offset for the destination square, D2
-      move[:piece] = :rook # piece to move
-      move[:color] = :black # color of piece to move
-      move[:cap_piece] = :pawn # piece to be captured, if any
-      move[:cap_color] = :white #color of piece to move, if any
+      move = Move.new(19, 51, :rook, :black, :pawn, :white)
 
       make_move_board.piece_BB[:rook] = 0x0000100000000000 # rook on D6
       make_move_board.color_BB[:black] = 0x0000100000000000

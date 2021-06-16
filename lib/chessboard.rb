@@ -1,5 +1,7 @@
 require './lib/gen_pseudo_moves.rb'
 require './lib/ray_attack.rb'
+require './lib/bb_to_square.rb'
+require './lib/move.rb'
 
 class Chessboard
   include Gen_Pseudo_Moves
@@ -45,6 +47,7 @@ class Chessboard
     @pseudo_ray_attacks = gen_ray_attacks
 
     # generate initial legal ray attack bitboards
+    @legal_ray_attacks = get_all_ray_attacks(@piece_BB, @color_BB, @pseudo_ray_attacks, @occupied_BB)
 
     # generate non-ray attack bitboards
     @knight_attacks = gen_knight_attacks
@@ -57,23 +60,14 @@ class Chessboard
     #We only need to update the legal RAY attacks after each piece move.
   end
 
-  # move: { 
-  #         from_offset: offset, 
-  #         to_offset: offset, 
-  #         piece: symbol,
-  #         color: symbol,
-  #         cap_piece: symbol,
-  #         cap_color: symbol
-  #       }
-
   def make_move(move)
-    from_BB = 1 << (63 - move[:from_offset])
-    to_BB = 1 << (63 - move[:to_offset])
+    from_BB = 1 << (63 - move.from_offset)
+    to_BB = 1 << (63 - move.to_offset)
     from_to_BB = from_BB ^ to_BB
-    @piece_BB[move[:piece]] ^= from_to_BB
-    @color_BB[move[:color]] ^= from_to_BB
-    @piece_BB[move[:cap_piece]] ^= to_BB
-    @color_BB[move[:cap_color]] ^= to_BB
+    @piece_BB[move.piece] ^= from_to_BB
+    @color_BB[move.color] ^= from_to_BB
+    @piece_BB[move.cap_piece] ^= to_BB
+    @color_BB[move.cap_color] ^= to_BB
     @occupied_BB ^= from_BB
     @occupied_BB |= to_BB
   end
