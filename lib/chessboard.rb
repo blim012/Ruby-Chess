@@ -47,7 +47,7 @@ class Chessboard
     @pseudo_ray_attacks = gen_ray_attacks
 
     # generate initial legal ray attack bitboards
-    @ray_threats = get_all_ray_threats(@piece_BB, @color_BB, @pseudo_ray_attacks, @occupied_BB)
+    @ray_threats = get_all_ray_threats
 
     # generate non-ray attack bitboards
     @knight_attacks = gen_knight_attacks
@@ -108,6 +108,29 @@ class Chessboard
 
     # add instance variable nonray_attacks, and a method to
     # populate it in the same format as legal_ray_attacks
+  end
+
+  def get_all_ray_threats
+    white_occupied = @color_BB[:white] & @occupied_BB
+    black_occupied = @color_BB[:black] & @occupied_BB
+    white_bishop = @piece_BB[:bishop] & white_occupied
+    white_rook = @piece_BB[:rook] & white_occupied
+    white_queen = @piece_BB[:queen] & white_occupied
+    black_bishop = @piece_BB[:bishop] & black_occupied
+    black_rook = @piece_BB[:rook] & black_occupied
+    black_queen = @piece_BB[:queen] & black_occupied
+
+    white_rays = {}
+    white_rays[:bishop] = get_legal_rays('bishop', white_bishop, @pseudo_ray_attacks, @occupied_BB)
+    white_rays[:rook] = get_legal_rays('rook', white_rook, @pseudo_ray_attacks, @occupied_BB)
+    white_rays[:queen] = get_legal_rays('queen', white_queen, @pseudo_ray_attacks, @occupied_BB)
+
+    black_rays = {}
+    black_rays[:bishop] = get_legal_rays('bishop', black_bishop, @pseudo_ray_attacks, @occupied_BB)
+    black_rays[:rook] = get_legal_rays('rook', black_rook, @pseudo_ray_attacks, @occupied_BB)
+    black_rays[:queen] =  get_legal_rays('queen', black_queen, @pseudo_ray_attacks, @occupied_BB)
+
+    legal_ray_threats = { white: white_rays, black: black_rays }
   end
 
   def print_board
