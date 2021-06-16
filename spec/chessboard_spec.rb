@@ -64,52 +64,48 @@ describe Chessboard do
   end
 
   context 'when testing the legality of a move' do
-    describe '#legal_queen_move?' do
-      subject(:queen_move_board) { described_class.new }
+    describe '#legal_ray_move?' do
+      subject(:ray_move_board) { described_class.new }
 
-      it 'returns true on legal quiet move' do
+      it 'returns true on legal quiet move with a queen' do
         move = Move.new(42, 21, :queen, :white)
-        queen_move_board.piece_BB[:queen] = 0x0000000000200000 # queen on C3
-        queen_move_board.color_BB[:white] |= 0x0000000000200000
-        queen_move_board.occupied_BB |= queen_move_board.piece_BB[:queen]
+        ray_move_board.piece_BB[:queen] = 0x0000000000200000 # queen on C3
+        ray_move_board.color_BB[:white] |= 0x0000000000200000
+        ray_move_board.occupied_BB |= ray_move_board.piece_BB[:queen]
         
-        result = queen_move_board.legal_queen_move?(move)
+        result = ray_move_board.legal_ray_move?(move)
         expect(result).to be(true)
       end
 
-      it 'returns true on legal capture' do
+      it 'returns true on legal capture with a queen' do
         move = Move.new(42, 14, :queen, :white)
-        queen_move_board.piece_BB[:queen] = 0x0000000000200000 # queen on C3
-        queen_move_board.color_BB[:white] |= 0x0000000000200000
-        queen_move_board.occupied_BB |= queen_move_board.piece_BB[:queen]
+        ray_move_board.piece_BB[:queen] = 0x0000000000200000 # queen on C3
+        ray_move_board.color_BB[:white] |= 0x0000000000200000
+        ray_move_board.occupied_BB |= ray_move_board.piece_BB[:queen]
         
-        result = queen_move_board.legal_queen_move?(move)
+        result = ray_move_board.legal_ray_move?(move)
         expect(result).to be(true)
       end
 
-      it 'returns false on illegal quiet move' do
+      it 'returns false on illegal quiet move with a queen'  do
         move = Move.new(42, 19, :queen, :white)
-        queen_move_board.piece_BB[:queen] = 0x0000000000200000 # queen on C3
-        queen_move_board.color_BB[:white] |= 0x0000000000200000
-        queen_move_board.occupied_BB |= queen_move_board.piece_BB[:queen]
+        ray_move_board.piece_BB[:queen] = 0x0000000000200000 # queen on C3
+        ray_move_board.color_BB[:white] |= 0x0000000000200000
+        ray_move_board.occupied_BB |= ray_move_board.piece_BB[:queen]
         
-        result = queen_move_board.legal_queen_move?(move)
+        result = ray_move_board.legal_ray_move?(move)
         expect(result).to be(false)
       end
 
-      it 'returns false on illegal capture' do
+      it 'returns false on illegal capture with a queen' do
         move = Move.new(42, 50, :queen, :white)
-        queen_move_board.piece_BB[:queen] = 0x0000000000200000 # queen on C3
-        queen_move_board.color_BB[:white] |= 0x0000000000200000
-        queen_move_board.occupied_BB |= queen_move_board.piece_BB[:queen]
+        ray_move_board.piece_BB[:queen] = 0x0000000000200000 # queen on C3
+        ray_move_board.color_BB[:white] |= 0x0000000000200000
+        ray_move_board.occupied_BB |= ray_move_board.piece_BB[:queen]
         
-        result = queen_move_board.legal_queen_move?(move)
+        result = ray_move_board.legal_ray_move?(move)
         expect(result).to be(false)
       end
-    end
-
-    describe '#legal_bishop_move?' do
-      
     end
   end
 end

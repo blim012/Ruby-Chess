@@ -31,10 +31,10 @@ module Ray_Attack
   end
 
   def get_legal_rays(piece, bitboard, pseudo_ray_attacks, occupied_BB)
-    ray_legal_method = -> square { self.send("legal_#{piece}_rays", square, pseudo_ray_attacks, occupied_BB) }
+    ray_legal_lambda = -> square { self.send("legal_#{piece}_rays", square, pseudo_ray_attacks, occupied_BB) }
     rays = []
     squares = find_squares(bitboard)
-    squares.each { |square| rays.push(ray_legal_method.call(square)) }
+    squares.each { |square| rays.push(ray_legal_lambda.call(square)) }
     rays
   end
 

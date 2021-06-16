@@ -65,15 +65,12 @@ class Chessboard
   #   2) depending on the piece, run 'piece'_move? (from_offset, to_offset)
   # end
 
-  def legal_bishop_move?(move)
-
-  end
-
-  def legal_queen_move?(move)
+  def legal_ray_move?(move)
+    legal_move_lambda = -> { self.send("legal_#{move.piece}_rays", move.from_offset, @pseudo_ray_attacks, @occupied_BB) }
     self_color_BB = (move.color == :white ? @color_BB[:white] : @color_BB[:black])
     self_color_BB &= @occupied_BB
-    legal_rays = legal_queen_rays(move.from_offset, @pseudo_ray_attacks, @occupied_BB)
     to_BB = 1 << (63 - move.to_offset)
+    legal_rays = legal_move_lambda.call
     return true if (legal_rays & to_BB != 0) && (to_BB & self_color_BB == 0)
     false
   end
