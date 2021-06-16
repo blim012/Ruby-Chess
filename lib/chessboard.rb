@@ -47,7 +47,7 @@ class Chessboard
     @pseudo_ray_attacks = gen_ray_attacks
 
     # generate initial legal ray attack bitboards
-    @legal_ray_attacks = get_all_ray_attacks(@piece_BB, @color_BB, @pseudo_ray_attacks, @occupied_BB)
+    @ray_threats = get_all_ray_threats(@piece_BB, @color_BB, @pseudo_ray_attacks, @occupied_BB)
 
     # generate non-ray attack bitboards
     @knight_attacks = gen_knight_attacks
@@ -60,10 +60,14 @@ class Chessboard
     #We only need to update the legal RAY attacks after each piece move.
   end
 
-  # legal_move? (from_offset, to_offset)
-  #   1) get piece type and color using from_offset 
-  #   2) depending on the piece, run 'piece'_move? (from_offset, to_offset)
-  # end
+  # We need to implement the in-check method next
+  # If you move ANY piece, you need to check to see if the king is in check
+  # if it is, you cannot perform that move
+  # i.e. if you move a pawn that was blocking a ray attack onto the king such that
+  #      it is no longer protecting the king, that move is illegal
+  # Therefore, you have to make sure that ANY move that you make cannot put the 
+  # king into check, and therefore you need to implement the in-check method
+  # before making any more move validation methods
 
   def legal_ray_move?(move)
     legal_move_lambda = -> { self.send("legal_#{move.piece}_rays", move.from_offset, @pseudo_ray_attacks, @occupied_BB) }
@@ -95,6 +99,15 @@ class Chessboard
     @color_BB[move.cap_color] ^= to_BB
     @occupied_BB ^= from_BB
     @occupied_BB |= to_BB
+  end
+
+  def get_threatened_squares(color)
+    color_ray_threats = @ray_threats[color][:bishop] |
+                        @ray_threats[color][:rook] |
+                        @ray_threats[color][:queen]
+
+    # add instance variable nonray_attacks, and a method to
+    # populate it in the same format as legal_ray_attacks
   end
 
   def print_board

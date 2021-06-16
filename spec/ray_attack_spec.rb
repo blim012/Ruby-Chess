@@ -141,7 +141,7 @@ describe Ray_Attack do
 
         result = piece_rays.get_legal_rays(piece, bitboard, pseudo_ray_attacks, occupied)
 
-        expect(result).to eq([0x12214001402, 0x204885000508000])
+        expect(result).to eq(0x204897214509402)
       end
     end
   end

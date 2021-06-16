@@ -6,8 +6,8 @@ module Ray_Attack
   include Dir8
   include BB_To_Square
 
-  #Returns all legal ray attacks for all pieces in a hash                                                                                                                                                                                                             
-  def get_all_ray_attacks(piece_BB, color_BB, pseudo_ray_attacks, occupied_BB)
+  #Returns all legal ray threats for all pieces in a hash                                                                                                                                                                                                             
+  def get_all_ray_threats(piece_BB, color_BB, pseudo_ray_attacks, occupied_BB)
     white_occupied = color_BB[:white] & occupied_BB
     black_occupied = color_BB[:black] & occupied_BB
     white_bishop = piece_BB[:bishop] & white_occupied
@@ -32,10 +32,8 @@ module Ray_Attack
 
   def get_legal_rays(piece, bitboard, pseudo_ray_attacks, occupied_BB)
     ray_legal_lambda = -> square { self.send("legal_#{piece}_rays", square, pseudo_ray_attacks, occupied_BB) }
-    rays = []
     squares = find_squares(bitboard)
-    squares.each { |square| rays.push(ray_legal_lambda.call(square)) }
-    rays
+    squares.reduce(0) { |rays, square| rays |= ray_legal_lambda.call(square) }
   end
 
   def legal_rook_rays(square, pseudo_ray_attacks, occupied_BB)
