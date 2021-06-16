@@ -64,46 +64,88 @@ describe Chessboard do
   end
 
   context 'when testing the legality of a move' do
-    describe '#legal_ray_move?' do
-      subject(:ray_move_board) { described_class.new }
+    subject(:legal_move_board) { described_class.new }
 
+    describe '#legal_ray_move?' do
       it 'returns true on legal quiet move with a queen' do
         move = Move.new(42, 21, :queen, :white)
-        ray_move_board.piece_BB[:queen] = 0x0000000000200000 # queen on C3
-        ray_move_board.color_BB[:white] |= 0x0000000000200000
-        ray_move_board.occupied_BB |= ray_move_board.piece_BB[:queen]
+        legal_move_board.piece_BB[:queen] = 0x0000000000200000 # queen on C3
+        legal_move_board.color_BB[:white] |= 0x0000000000200000
+        legal_move_board.occupied_BB |= legal_move_board.piece_BB[:queen]
         
-        result = ray_move_board.legal_ray_move?(move)
+        result = legal_move_board.legal_ray_move?(move)
         expect(result).to be(true)
       end
 
       it 'returns true on legal capture with a queen' do
         move = Move.new(42, 14, :queen, :white)
-        ray_move_board.piece_BB[:queen] = 0x0000000000200000 # queen on C3
-        ray_move_board.color_BB[:white] |= 0x0000000000200000
-        ray_move_board.occupied_BB |= ray_move_board.piece_BB[:queen]
+        legal_move_board.piece_BB[:queen] = 0x0000000000200000 # queen on C3
+        legal_move_board.color_BB[:white] |= 0x0000000000200000
+        legal_move_board.occupied_BB |= legal_move_board.piece_BB[:queen]
         
-        result = ray_move_board.legal_ray_move?(move)
+        result = legal_move_board.legal_ray_move?(move)
         expect(result).to be(true)
       end
 
       it 'returns false on illegal quiet move with a queen'  do
         move = Move.new(42, 19, :queen, :white)
-        ray_move_board.piece_BB[:queen] = 0x0000000000200000 # queen on C3
-        ray_move_board.color_BB[:white] |= 0x0000000000200000
-        ray_move_board.occupied_BB |= ray_move_board.piece_BB[:queen]
+        legal_move_board.piece_BB[:queen] = 0x0000000000200000 # queen on C3
+        legal_move_board.color_BB[:white] |= 0x0000000000200000
+        legal_move_board.occupied_BB |= legal_move_board.piece_BB[:queen]
         
-        result = ray_move_board.legal_ray_move?(move)
+        result = legal_move_board.legal_ray_move?(move)
         expect(result).to be(false)
       end
 
       it 'returns false on illegal capture with a queen' do
         move = Move.new(42, 50, :queen, :white)
-        ray_move_board.piece_BB[:queen] = 0x0000000000200000 # queen on C3
-        ray_move_board.color_BB[:white] |= 0x0000000000200000
-        ray_move_board.occupied_BB |= ray_move_board.piece_BB[:queen]
+        legal_move_board.piece_BB[:queen] = 0x0000000000200000 # queen on C3
+        legal_move_board.color_BB[:white] |= 0x0000000000200000
+        legal_move_board.occupied_BB |= legal_move_board.piece_BB[:queen]
         
-        result = ray_move_board.legal_ray_move?(move)
+        result = legal_move_board.legal_ray_move?(move)
+        expect(result).to be(false)
+      end
+    end
+
+    describe '#legal_knight_move?' do
+      it 'returns true on legal quiet move' do
+        move = Move.new(35, 29, :knight, :black)
+        legal_move_board.piece_BB[:knight] = 0x0000000010000000 # knight on D4
+        legal_move_board.color_BB[:black] |= 0x0000000010000000
+        legal_move_board.occupied_BB |= legal_move_board.piece_BB[:knight]
+        
+        result = legal_move_board.legal_knight_move?(move)
+        expect(result).to be(true)
+      end
+
+      it 'returns true on legal capture' do
+        move = Move.new(35, 50, :knight, :black)
+        legal_move_board.piece_BB[:knight] = 0x0000000010000000 # knight on D4
+        legal_move_board.color_BB[:black] |= 0x0000000010000000
+        legal_move_board.occupied_BB |= legal_move_board.piece_BB[:knight]
+        
+        result = legal_move_board.legal_knight_move?(move)
+        expect(result).to be(true)
+      end
+
+      it 'returns false on illegal quiet move'  do
+        move = Move.new(27, 43, :knight, :black)
+        legal_move_board.piece_BB[:knight] = 0x0000001000000000 # knight on D5
+        legal_move_board.color_BB[:black] |= 0x0000001000000000
+        legal_move_board.occupied_BB |= legal_move_board.piece_BB[:knight]
+        
+        result = legal_move_board.legal_knight_move?(move)
+        expect(result).to be(false)
+      end
+
+      it 'returns false on illegal capture' do
+        move = Move.new(27, 10, :knight, :black)
+        legal_move_board.piece_BB[:knight] = 0x0000001000000000 # knight on D5
+        legal_move_board.color_BB[:black] |= 0x0000001000000000
+        legal_move_board.occupied_BB |= legal_move_board.piece_BB[:knight]
+        
+        result = legal_move_board.legal_knight_move?(move)
         expect(result).to be(false)
       end
     end
