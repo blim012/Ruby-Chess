@@ -44,6 +44,8 @@ class Chessboard
     # generate pseudo-legal bitboards ray attacks
     @pseudo_ray_attacks = gen_ray_attacks
 
+    # generate initial legal ray attack bitboards
+
     # generate non-ray attack bitboards
     @knight_attacks = gen_knight_attacks
     @king_attacks = gen_king_attacks
@@ -75,6 +77,11 @@ class Chessboard
     @occupied_BB ^= from_BB
     @occupied_BB |= to_BB
   end
+
+  # legal_move? (from_offset, to_offset)
+  #   1) get piece type and color using from_offset 
+  #   2) depending on the piece, run 'piece'_move? (from_offset, to_offset)
+  # end
 
   def print_board
     square = 0x8000000000000000

@@ -120,4 +120,29 @@ describe Ray_Attack do
       end
     end
   end
+
+  context 'when getting all of the rays for a type of piece' do
+    describe '#get_legal_rays' do
+      subject(:piece_rays) { dummy_chessboard.new }
+
+      it 'generates the set of all possible rays for bishops' do
+        pseudo_ray_attacks = Array.new(8) { Array.new(64) }
+        pseudo_ray_attacks[0][44] = 0x0080402010000000 # northwest
+        pseudo_ray_attacks[2][44] = 0x0000010204000000 # northeast
+        pseudo_ray_attacks[4][44] = 0x0000000000000402 # southeast
+        pseudo_ray_attacks[6][44] = 0x0000000000001020 # southwest
+        pseudo_ray_attacks[0][34] = 0x0000804000000000 # northwest
+        pseudo_ray_attacks[2][34] = 0x0204081000000000 # northeast
+        pseudo_ray_attacks[4][34] = 0x0000000000108040 # southeast
+        pseudo_ray_attacks[6][34] = 0x0000000000408000 # southwest
+        piece = 'bishop'
+        bitboard = 0x0000000020080000
+        occupied = 0x6FCA11A4C011F175
+
+        result = piece_rays.get_legal_rays(piece, bitboard, pseudo_ray_attacks, occupied)
+
+        expect(result).to eq([0x12214001402, 0x204885000508000])
+      end
+    end
+  end
 end
