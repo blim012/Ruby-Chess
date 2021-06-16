@@ -60,6 +60,24 @@ class Chessboard
     #We only need to update the legal RAY attacks after each piece move.
   end
 
+  # legal_move? (from_offset, to_offset)
+  #   1) get piece type and color using from_offset 
+  #   2) depending on the piece, run 'piece'_move? (from_offset, to_offset)
+  # end
+
+  def legal_bishop_move?(move)
+
+  end
+
+  def legal_queen_move?(move)
+    self_color_BB = (move.color == :white ? @color_BB[:white] : @color_BB[:black])
+    self_color_BB &= @occupied_BB
+    legal_rays = legal_queen_rays(move.from_offset, @pseudo_ray_attacks, @occupied_BB)
+    to_BB = 1 << (63 - move.to_offset)
+    return true if (legal_rays & to_BB != 0) && (to_BB & self_color_BB == 0)
+    false
+  end
+
   def make_move(move)
     from_BB = 1 << (63 - move.from_offset)
     to_BB = 1 << (63 - move.to_offset)
@@ -71,11 +89,6 @@ class Chessboard
     @occupied_BB ^= from_BB
     @occupied_BB |= to_BB
   end
-
-  # legal_move? (from_offset, to_offset)
-  #   1) get piece type and color using from_offset 
-  #   2) depending on the piece, run 'piece'_move? (from_offset, to_offset)
-  # end
 
   def print_board
     square = 0x8000000000000000
