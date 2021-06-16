@@ -6,6 +6,30 @@ module Ray_Attack
   include Dir8
   include BB_To_Square
 
+  #Returns all legal ray attacks for all pieces in a hash                                                                                                                                                                                                             
+  def get_all_ray_attacks(piece_BB, color_BB, pseudo_ray_attacks, occupied_BB)
+    white_occupied = color_BB[:white] & occupied_BB
+    black_occupied = color_BB[:black] & occupied_BB
+    white_bishop = piece_BB[:bishop] & white_occupied
+    white_rook = piece_BB[:rook] & white_occupied
+    white_queen = piece_BB[:queen] & white_occupied
+    black_bishop = piece_BB[:bishop] & black_occupied
+    black_rook = piece_BB[:rook] & black_occupied
+    black_queen = piece_BB[:queen] & black_occupied
+
+    white_rays = {}
+    white_rays[:bishop] = get_legal_rays('bishop', white_bishop, pseudo_ray_attacks, occupied_BB)
+    white_rays[:rook] = get_legal_rays('rook', white_rook, pseudo_ray_attacks, occupied_BB)
+    white_rays[:queen] = get_legal_rays('queen', white_queen, pseudo_ray_attacks, occupied_BB)
+
+    black_rays = {}
+    black_rays[:bishop] = get_legal_rays('bishop', black_bishop, pseudo_ray_attacks, occupied_BB)
+    black_rays[:rook] = get_legal_rays('rook', black_rook, pseudo_ray_attacks, occupied_BB)
+    black_rays[:queen] =  get_legal_rays('queen', black_queen, pseudo_ray_attacks, occupied_BB)
+
+    legal_ray_attacks = { white: white_rays, black: black_rays }
+  end
+
   def get_legal_rays(piece, bitboard, pseudo_ray_attacks, occupied_BB)
     ray_legal_method = -> square { self.send("legal_#{piece}_rays", square, pseudo_ray_attacks, occupied_BB) }
     rays = []
