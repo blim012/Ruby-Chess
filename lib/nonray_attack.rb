@@ -22,8 +22,6 @@ module Nonray_Attack
     squares.reduce(0) { |threat_BB, square| threat_BB |= king_attacks[square] }
   end
 
-  private
-
   def get_pawn_column_mask(square)
     shift_offset = 63 - square
     column = shift_offset % 8
