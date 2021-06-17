@@ -127,8 +127,8 @@ class Chessboard
   def get_all_nonray_threats(colored_pieces, color)
     colored_pawn_attack = (color == :white ? @w_pawn_attacks : @b_pawn_attacks)
     colored_pawn_threats = pawn_threats(colored_pieces[:pawn], colored_pawn_attack)
-    colored_knight_threats = knight_threats(colored_pieces[:knight], knight_attacks)
-    colored_king_threats = king_threats(colored_pieces[:king], king_attacks)
+    colored_knight_threats = knight_threats(colored_pieces[:knight], @knight_attacks)
+    colored_king_threats = king_threats(colored_pieces[:king], @king_attacks)
     colored_pawn_threats | colored_knight_threats | colored_king_threats
   end
 
@@ -146,6 +146,14 @@ class Chessboard
 
   def get_occupied_by_color(color)
     @color_BB[color] & @occupied_BB
+  end
+
+  def in_check?(color)
+    enemy_color = (color == :white ? :black : :white)
+    colored_king_BB = @piece_BB[:king] & @color_BB[color]
+    threatened_squares = get_threats_by_color(enemy_color)
+    return true if colored_king_BB & threatened_squares != 0
+    false
   end
 
   def print_board

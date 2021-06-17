@@ -288,6 +288,73 @@ describe Chessboard do
     end
   end
 
-  context 'when obtaining a threat bitboard of a color' do
+  describe '#in_check?' do
+    subject(:check_board) { described_class.new }
+
+    it 'returns true if king is in check by an opposing ray' do
+      check_board.piece_BB[:pawn] = 0x0000100800000000
+      check_board.piece_BB[:bishop] = 0
+      check_board.piece_BB[:knight] = 0x0000000000900000
+      check_board.piece_BB[:rook] = 0
+      check_board.piece_BB[:queen] = 0x0000000000040000
+      check_board.piece_BB[:king] = 0x0000200000000020
+
+      check_board.color_BB[:white] = 0x0000300800000000
+      check_board.color_BB[:black] = 0x0000000000940020
+      
+      check_board.occupied_BB = check_board.piece_BB[:pawn] |
+                                check_board.piece_BB[:bishop] |
+                                check_board.piece_BB[:knight] |
+                                check_board.piece_BB[:rook] |
+                                check_board.piece_BB[:queen] |
+                                check_board.piece_BB[:king]
+
+      white_check = check_board.in_check?(:white) 
+      expect(white_check).to be(true)
+    end
+
+    it 'returns true if king is in check by a nonray piece' do
+      check_board.piece_BB[:pawn] = 0x0040100800000000
+      check_board.piece_BB[:bishop] = 0
+      check_board.piece_BB[:knight] = 0x0000000000900000
+      check_board.piece_BB[:rook] = 0
+      check_board.piece_BB[:queen] = 0
+      check_board.piece_BB[:king] = 0x0000200000000020
+
+      check_board.color_BB[:white] = 0x0000300800000000
+      check_board.color_BB[:black] = 0x0040000000900020
+      
+      check_board.occupied_BB = check_board.piece_BB[:pawn] |
+                                check_board.piece_BB[:bishop] |
+                                check_board.piece_BB[:knight] |
+                                check_board.piece_BB[:rook] |
+                                check_board.piece_BB[:queen] |
+                                check_board.piece_BB[:king]
+
+      white_check = check_board.in_check?(:white) 
+      expect(white_check).to be(true)
+    end
+
+    it 'returns false if king is not in check' do
+      check_board.piece_BB[:pawn] = 0x0000000028000000
+      check_board.piece_BB[:bishop] = 0x0000000000000400
+      check_board.piece_BB[:knight] = 0x0000000400000000
+      check_board.piece_BB[:rook] = 0x0000020000000000
+      check_board.piece_BB[:queen] = 0x0020000000000000
+      check_board.piece_BB[:king] = 0x0000001000001000
+
+      check_board.color_BB[:white] = 0x0000001008000000
+      check_board.color_BB[:black] = 0x0020020402001400
+      
+      check_board.occupied_BB = check_board.piece_BB[:pawn] |
+                                check_board.piece_BB[:bishop] |
+                                check_board.piece_BB[:knight] |
+                                check_board.piece_BB[:rook] |
+                                check_board.piece_BB[:queen] |
+                                check_board.piece_BB[:king]
+
+      white_check = check_board.in_check?(:white) 
+      expect(white_check).to be(false)
+    end
   end
 end
