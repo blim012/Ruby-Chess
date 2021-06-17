@@ -150,4 +150,37 @@ describe Chessboard do
       end
     end
   end
+
+  describe '#get_pieces_by_color' do
+    subject(:get_pieces_board) { described_class.new }
+
+    it 'returns the bitboards of all white pieces' do
+      white_pieces = get_pieces_board.get_pieces_by_color(:white)
+      expected_pieces = {}
+      expected_pieces[:pawn] = 0x000000000000FF00
+      expected_pieces[:bishop] = 0x0000000000000024
+      expected_pieces[:knight] = 0x0000000000000042
+      expected_pieces[:rook] = 0x0000000000000081
+      expected_pieces[:queen] = 0x0000000000000010
+      expected_pieces[:king] = 0x0000000000000008
+
+      expect(expected_pieces).to eq(white_pieces)
+    end
+
+    it 'returns the bitboards of all black pieces' do
+      black_bitboard = get_pieces_board.get_pieces_by_color(:black)
+      expected_pieces = {}
+      expected_pieces[:pawn] = 0x00FF000000000000
+      expected_pieces[:bishop] = 0x2400000000000000
+      expected_pieces[:knight] = 0x4200000000000000
+      expected_pieces[:rook] = 0x8100000000000000
+      expected_pieces[:queen] = 0x1000000000000000
+      expected_pieces[:king] = 0x0800000000000000
+
+      expect(expected_pieces).to eq(black_bitboard)
+    end
+  end
+
+  context 'when obtaining a threat bitboard of a color' do
+  end
 end
