@@ -68,8 +68,7 @@ class Chessboard
 
   def legal_ray_move?(move)
     legal_move_lambda = -> { self.send("legal_#{move.piece}_rays", move.from_offset, @pseudo_ray_attacks, @occupied_BB) }
-    self_color_BB = (move.color == :white ? @color_BB[:white] : @color_BB[:black])
-    self_color_BB &= @occupied_BB
+    self_color_BB = @color_BB[move.color] & @occupied_BB
     to_BB = 1 << (63 - move.to_offset)
     legal_rays = legal_move_lambda.call
     return true if (legal_rays & to_BB != 0) && 
@@ -78,8 +77,7 @@ class Chessboard
   end
 
   def legal_knight_move?(move)
-    self_color_BB = (move.color == :white ? @color_BB[:white] : @color_BB[:black])
-    self_color_BB &= @occupied_BB
+    self_color_BB = @color_BB[move.color] & @occupied_BB
     to_BB = 1 << (63 - move.to_offset)
     return true if (@knight_attacks[move.from_offset] & to_BB != 0) && 
                    (to_BB & self_color_BB == 0)
