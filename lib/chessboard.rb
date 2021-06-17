@@ -57,6 +57,20 @@ class Chessboard
     @prev_move = nil
   end
 
+  def legal_move?(move)
+    case move.piece
+    when :bishop, :rook, :queen
+      return legal_ray_move?(move)
+    when :pawn
+      return legal_pawn_move?(move)
+    when :knight
+      return legal_knight_move?(move)
+    when :king
+      return legal_king_move?(move)
+    end
+    false
+  end
+
   def legal_ray_move?(move)
     legal_move_lambda = -> { self.send("legal_#{move.piece}_rays", move.from_offset, @pseudo_ray_attacks, @occupied_BB) }
     self_color_BB = get_occupied_by_color(move.color)
