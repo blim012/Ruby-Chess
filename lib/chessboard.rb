@@ -1,4 +1,5 @@
 require './lib/gen_pseudo_moves.rb'
+require './lib/nonray_attack.rb'
 require './lib/ray_attack.rb'
 require './lib/bb_to_square.rb'
 require './lib/move.rb'
@@ -6,6 +7,7 @@ require './lib/move.rb'
 class Chessboard
   include Gen_Pseudo_Moves
   include Ray_Attack
+  include Nonray_Attack
 
   attr_accessor :piece_BB, :color_BB, :occupied_BB
 
@@ -78,6 +80,23 @@ class Chessboard
     to_BB = 1 << (63 - move.to_offset)
     return true if (@king_attacks[move.from_offset] & to_BB != 0) &&
                    (to_BB & self_color_BB == 0)
+    false
+  end
+
+  def legal_pawn_move?(move)
+    colored_pawn_attack = (move.color == :white ? @w_pawn_attacks : @b_pawn_attacks)
+    self_color_BB = get_occupied_by_color(move.color)
+    enemy_color_BB = get_occupied_by_color(move.cap_color)
+    pawn_column_mask = get_pawn_column_mask(move.from_offset)
+    to_BB = 1 << (63 - move.to_offset)
+    if to_BB & pawn_column_mask != 0 # Not a capture attempt
+      return true if (colored_pawn_attack[move.from_offset] & to_BB != 0) &&
+                     (to_BB & @occupied_BB == 0)
+    else # Capture attempt
+      return true if (colored_pawn_attack[move.from_offset] & to_BB != 0) &&
+                     (to_BB & self_color_BB == 0) &&
+                     (to_BB & enemy_color_BB != 0)
+    end
     false
   end
 

@@ -191,6 +191,71 @@ describe Chessboard do
         expect(result).to be(false)
       end
     end
+
+    describe '#legal_pawn_move?' do
+      it 'returns true on legal quiet move' do
+        move = Move.new(35, 43, :pawn, :black)
+        legal_move_board.piece_BB[:pawn] = 0x0000000010000000 # pawn on D4
+        legal_move_board.color_BB[:black] |= 0x0000000010000000
+        legal_move_board.occupied_BB |= legal_move_board.piece_BB[:pawn]
+        
+        result = legal_move_board.legal_pawn_move?(move)
+        expect(result).to be(true)
+      end
+
+      it 'returns true on legal quiet move, moving two squares on its first move' do
+        move = Move.new(11, 27, :pawn, :black)
+        legal_move_board.piece_BB[:pawn] = 0x0000000010000000 # pawn on D7
+        legal_move_board.color_BB[:black] |= 0x0000000010000000
+        legal_move_board.occupied_BB |= legal_move_board.piece_BB[:pawn]
+        
+        result = legal_move_board.legal_pawn_move?(move)
+        expect(result).to be(true)
+      end
+
+      it 'returns true on legal capture' do
+        move = Move.new(43, 50, :pawn, :black, :pawn, :white)
+        legal_move_board.piece_BB[:pawn] = 0x0000000000100000 # pawn on D3
+        legal_move_board.color_BB[:black] |= 0x0000000000100000
+        legal_move_board.occupied_BB |= legal_move_board.piece_BB[:pawn]
+        
+        result = legal_move_board.legal_pawn_move?(move)
+        expect(result).to be(true)
+      end
+
+      it 'returns false on illegal quiet move'  do
+        move = Move.new(27, 43, :pawn, :black)
+        legal_move_board.piece_BB[:pawn] = 0x0000001000000000 # pawn on D5
+        legal_move_board.color_BB[:black] |= 0x0000001000000000
+        legal_move_board.occupied_BB |= legal_move_board.piece_BB[:pawn]
+        
+        result = legal_move_board.legal_pawn_move?(move)
+        expect(result).to be(false)
+      end
+
+      it 'returns false when trying to move forward onto an opposing piece' do
+        move = Move.new(27, 35, :pawn, :black, :pawn, :white)
+        legal_move_board.piece_BB[:pawn] = 0x0000001010000000 
+        legal_move_board.color_BB[:black] |= 0x0000001000000000 # black pawn on D5
+        legal_move_board.color_BB[:white] |= 0x0000000010000000 # white pawn on D4
+        legal_move_board.occupied_BB |= legal_move_board.piece_BB[:pawn]
+        
+        result = legal_move_board.legal_pawn_move?(move)
+        expect(result).to be(false)
+      end
+
+      it 'returns false on illegal capture' do
+        move = Move.new(19, 28, :pawn, :black, :knight, :black)
+        legal_move_board.piece_BB[:pawn] = 0x0000100000000000 # pawn on D6
+        legal_move_board.piece_BB[:knight] = 0x0000000800000000 # knight on E5
+        legal_move_board.color_BB[:black] |= 0x0000100800000000
+        legal_move_board.occupied_BB |= legal_move_board.piece_BB[:pawn]
+        legal_move_board.occupied_BB |= legal_move_board.piece_BB[:knight]
+        
+        result = legal_move_board.legal_pawn_move?(move)
+        expect(result).to be(false)
+      end
+    end
   end
 
   describe '#get_pieces_by_color' do
