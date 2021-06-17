@@ -149,6 +149,48 @@ describe Chessboard do
         expect(result).to be(false)
       end
     end
+
+    describe '#legal_king_move?' do
+      it 'returns true on legal quiet move' do
+        move = Move.new(35, 27, :king, :black)
+        legal_move_board.piece_BB[:king] = 0x0000000010000000 # king on D4
+        legal_move_board.color_BB[:black] |= 0x0000000010000000
+        legal_move_board.occupied_BB |= legal_move_board.piece_BB[:king]
+        
+        result = legal_move_board.legal_king_move?(move)
+        expect(result).to be(true)
+      end
+
+      it 'returns true on legal capture' do
+        move = Move.new(43, 51, :king, :black)
+        legal_move_board.piece_BB[:king] = 0x0000000000100000 # king on D3
+        legal_move_board.color_BB[:black] |= 0x0000000000100000
+        legal_move_board.occupied_BB |= legal_move_board.piece_BB[:king]
+        
+        result = legal_move_board.legal_king_move?(move)
+        expect(result).to be(true)
+      end
+
+      it 'returns false on illegal quiet move'  do
+        move = Move.new(27, 43, :king, :black)
+        legal_move_board.piece_BB[:king] = 0x0000001000000000 # king on D5
+        legal_move_board.color_BB[:black] |= 0x0000001000000000
+        legal_move_board.occupied_BB |= legal_move_board.piece_BB[:king]
+        
+        result = legal_move_board.legal_king_move?(move)
+        expect(result).to be(false)
+      end
+
+      it 'returns false on illegal capture' do
+        move = Move.new(19, 11, :king, :black)
+        legal_move_board.piece_BB[:king] = 0x0000100000000000 # king on D6
+        legal_move_board.color_BB[:black] |= 0x0000100000000000
+        legal_move_board.occupied_BB |= legal_move_board.piece_BB[:king]
+        
+        result = legal_move_board.legal_king_move?(move)
+        expect(result).to be(false)
+      end
+    end
   end
 
   describe '#get_pieces_by_color' do

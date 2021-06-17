@@ -53,22 +53,11 @@ class Chessboard
     @b_pawn_attacks = gen_b_pawn_attacks
 
     @prev_move = nil
-
-    #We only need to update the legal RAY attacks after each piece move.
   end
-
-  # We need to implement the in-check method next
-  # If you move ANY piece, you need to check to see if the king is in check
-  # if it is, you cannot perform that move
-  # i.e. if you move a pawn that was blocking a ray attack onto the king such that
-  #      it is no longer protecting the king, that move is illegal
-  # Therefore, you have to make sure that ANY move that you make cannot put the 
-  # king into check, and therefore you need to implement the in-check method
-  # before making any more move validation methods
 
   def legal_ray_move?(move)
     legal_move_lambda = -> { self.send("legal_#{move.piece}_rays", move.from_offset, @pseudo_ray_attacks, @occupied_BB) }
-    self_color_BB = @color_BB[move.color] & @occupied_BB
+    self_color_BB = get_occupied_by_color(move.color)
     to_BB = 1 << (63 - move.to_offset)
     legal_rays = legal_move_lambda.call
     return true if (legal_rays & to_BB != 0) && 
@@ -77,9 +66,17 @@ class Chessboard
   end
 
   def legal_knight_move?(move)
-    self_color_BB = @color_BB[move.color] & @occupied_BB
+    self_color_BB = get_occupied_by_color(move.color)
     to_BB = 1 << (63 - move.to_offset)
     return true if (@knight_attacks[move.from_offset] & to_BB != 0) && 
+                   (to_BB & self_color_BB == 0)
+    false
+  end
+
+  def legal_king_move?(move)
+    self_color_BB = get_occupied_by_color(move.color)
+    to_BB = 1 << (63 - move.to_offset)
+    return true if (@king_attacks[move.from_offset] & to_BB != 0) &&
                    (to_BB & self_color_BB == 0)
     false
   end
@@ -117,7 +114,7 @@ class Chessboard
   end
 
   def get_pieces_by_color(color)
-    occupied_color_BB = @color_BB[color] & @occupied_BB
+    occupied_color_BB = get_occupied_by_color(color)
     colored_pieces = {}
     colored_pieces[:bishop] = @piece_BB[:bishop] & occupied_color_BB
     colored_pieces[:rook] = @piece_BB[:rook] & occupied_color_BB
@@ -126,6 +123,10 @@ class Chessboard
     colored_pieces[:knight] = @piece_BB[:knight] & occupied_color_BB
     colored_pieces[:pawn] = @piece_BB[:pawn] & occupied_color_BB
     colored_pieces
+  end
+
+  def get_occupied_by_color(color)
+    @color_BB[color] & @occupied_BB
   end
 
   def print_board
