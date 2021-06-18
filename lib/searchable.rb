@@ -1,5 +1,5 @@
 # Associates each set bit in a bitboard to a square
-module BB_To_Square
+module Searchable
   def find_squares(bitboard)
     squares = []
     until bitboard == 0 do

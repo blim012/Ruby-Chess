@@ -1,10 +1,10 @@
 require './lib/dir8.rb'
-require './lib/bb_to_square.rb'
+require './lib/searchable.rb'
 
 # Generates legal ray attacks based on the current pieces on the board
 module Ray_Attack
   include Dir8
-  include BB_To_Square
+  include Searchable
 
   def get_legal_rays(piece, bitboard, pseudo_ray_attacks, occupied_BB)
     ray_legal_lambda = -> square { self.send("legal_#{piece}_rays", square, pseudo_ray_attacks, occupied_BB) }

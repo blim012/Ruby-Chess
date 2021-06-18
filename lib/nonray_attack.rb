@@ -1,7 +1,7 @@
-require './lib/bb_to_square.rb'
+require './lib/searchable.rb'
 
 module Nonray_Attack
-  include BB_To_Square
+  include Searchable
 
   def knight_threats(knight_bitboard, knight_attacks)
     squares = find_squares(knight_bitboard)

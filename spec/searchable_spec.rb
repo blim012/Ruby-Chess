@@ -1,7 +1,7 @@
-require 'bb_to_square.rb'
+require './lib/searchable.rb'
 
-describe BB_To_Square do
-  let(:dummy_chessboard) { Class.new {include BB_To_Square} }
+describe Searchable do
+  let(:dummy_chessboard) { Class.new {include Searchable} }
 
   describe '#find_squares' do
     subject(:bb_to_square) { dummy_chessboard.new }
