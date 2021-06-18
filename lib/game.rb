@@ -10,7 +10,12 @@ class Game
 
   def play
     loop do
-      get_input
+      @board.print_board
+      src_dest = get_input
+      move = @board.generate_move(src_dest, @color)
+      next if move.nil?
+      next unless @board.legal_move?(move)
+      @board.make_move(move)
       switch_color
     end
   end

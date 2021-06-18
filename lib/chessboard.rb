@@ -125,7 +125,8 @@ class Chessboard
   def legal_pawn_move?(move)
     colored_pawn_attack = (move.color == :white ? @w_pawn_attacks : @b_pawn_attacks)
     self_color_BB = get_occupied_by_color(move.color)
-    enemy_color_BB = get_occupied_by_color(move.cap_color)
+    enemy_color = (move.color = :white ? :black : :white)
+    enemy_color_BB = get_occupied_by_color(enemy_color)
     pawn_column_mask = get_pawn_column_mask(move.from_offset)
     to_BB = 1 << (63 - move.to_offset)
     if to_BB & pawn_column_mask != 0 # Not a capture attempt
@@ -145,8 +146,8 @@ class Chessboard
     from_to_BB = from_BB ^ to_BB
     @piece_BB[move.piece] ^= from_to_BB
     @color_BB[move.color] ^= from_to_BB
-    @piece_BB[move.cap_piece] ^= to_BB
-    @color_BB[move.cap_color] ^= to_BB
+    @piece_BB[move.cap_piece] ^= to_BB unless move.cap_piece.nil?
+    @color_BB[move.cap_color] ^= to_BB unless move.cap_color.nil?
     @occupied_BB ^= from_BB
     @occupied_BB |= to_BB
   end
@@ -232,5 +233,6 @@ class Chessboard
       end
       puts ''
     end
+    puts ''
   end
 end
