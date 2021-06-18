@@ -20,17 +20,17 @@ describe Chessboard do
     subject(:gen_move_board) { described_class.new }
 
     it 'returns a move class instance for a white piece on white\'s turn' do
-      move = gen_move_board.generate_move(57, 42, :white)
+      move = gen_move_board.generate_move([57, 42], :white)
       expect(move).to have_attributes(from_offset: 57, to_offset: 42, piece: :knight, color: :white, cap_piece: nil, cap_color: nil)
     end
 
     it 'returns nil if attempting to move a white piece on black\'s turn' do
-      move = gen_move_board.generate_move(58, 43, :black)
+      move = gen_move_board.generate_move([58, 43], :black)
       expect(move).to be_nil
     end
 
     it 'returns nil if attempting to move from a square with no piece' do
-      move = gen_move_board.generate_move(42, 28, :white)
+      move = gen_move_board.generate_move([42, 28], :white)
       expect(move).to be_nil
     end
   end

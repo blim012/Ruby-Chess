@@ -70,7 +70,9 @@ class Chessboard
     [nil, nil]
   end
 
-  def generate_move(src, dest, color)
+  def generate_move(src_dest, color)
+    src = src_dest[0]
+    dest = src_dest[1]
     src_BB = 1 << (63 - src)
     return nil if src_BB & get_occupied_by_color(color) == 0
 
