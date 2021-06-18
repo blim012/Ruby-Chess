@@ -2,6 +2,39 @@ require './lib/chessboard.rb'
 require './lib/move.rb'
 
 describe Chessboard do
+  describe '#find_piece' do
+    subject(:find_piece_board) { described_class.new }
+
+    it 'returns the piece and color in a given square' do
+      result = find_piece_board.find_piece(59)
+      expect(result).to eq([:queen, :white])
+    end
+
+    it 'returns [nil, nil] if there is no piece in the given square' do
+      result = find_piece_board.find_piece(35)
+      expect(result).to eq([nil, nil])
+    end
+  end
+
+  describe '#generate_move' do
+    subject(:gen_move_board) { described_class.new }
+
+    it 'returns a move class instance for a white piece on white\'s turn' do
+      move = gen_move_board.generate_move(57, 42, :white)
+      expect(move).to have_attributes(from_offset: 57, to_offset: 42, piece: :knight, color: :white, cap_piece: nil, cap_color: nil)
+    end
+
+    it 'returns nil if attempting to move a white piece on black\'s turn' do
+      move = gen_move_board.generate_move(58, 43, :black)
+      expect(move).to be_nil
+    end
+
+    it 'returns nil if attempting to move from a square with no piece' do
+      move = gen_move_board.generate_move(42, 28, :white)
+      expect(move).to be_nil
+    end
+  end
+
   describe '#make_move' do
     subject(:make_move_board) { described_class.new }
 

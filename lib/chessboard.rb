@@ -58,9 +58,26 @@ class Chessboard
     @prev_move = nil
   end
 
-  def generate_move(src, dest)
+  # Returns the piece and color that is residing on a square
+  def find_piece(square)
+    square_BB = 1 << (63 - square)
+    @piece_BB.each do |piece, bitboard|
+      piece_loc = square_BB & bitboard
+      return [piece, :white] if piece_loc & @color_BB[:white] != 0
+      return [piece, :black] if piece_loc & @color_BB[:black] != 0
+    end
 
-    #move = move.new
+    [nil, nil]
+  end
+
+  def generate_move(src, dest, color)
+    src_BB = 1 << (63 - src)
+    return nil if src_BB & get_occupied_by_color(color) == 0
+
+    piece_type = find_piece(src)
+    cap_piece_type = find_piece(dest)
+    
+    Move.new(src, dest, piece_type[0], piece_type[1], cap_piece_type[0], cap_piece_type[1])
   end
 
   def legal_move?(move)
