@@ -15,7 +15,8 @@ describe Nonray_Attack do
         knight_attacks[38] = 0x0000050800080500
         knight_attacks[49] = 0x00000000A0100010
 
-        result = nonray_board.knight_threats(0, knight_attacks)
+        threat_hash = nonray_board.knight_threats(0, knight_attacks)
+        result = threat_hash.values.reduce(0) { |threat_BB, threat| threat_BB |= threat }
         expect(result).to eq(0x00000508A0180510)
       end
     end
@@ -30,7 +31,8 @@ describe Nonray_Attack do
         king_attacks[38] = 0x0000000705070000
         king_attacks[49] = 0x0000000000E0A0E0
 
-        result = nonray_board.king_threats(0, king_attacks)
+        threat_hash = nonray_board.king_threats(0, king_attacks)
+        result = threat_hash.values.reduce(0) { |threat_BB, threat| threat_BB |= threat }
         expect(result).to eq(0x0000000705E7A0E0)
       end
     end
@@ -46,7 +48,8 @@ describe Nonray_Attack do
         pawn_attacks[38] = 0x0000000500000000
         pawn_attacks[49] = 0x0000000000A00000
 
-        result = nonray_board.pawn_threats(0, pawn_attacks)
+        threat_hash = nonray_board.pawn_threats(0, pawn_attacks)
+        result = threat_hash.values.reduce(0) { |threat_BB, threat| threat_BB |= threat }
         expect(result).to eq(0x0000000500A00000)
       end
     end

@@ -125,7 +125,7 @@ class Chessboard
   def legal_pawn_move?(move)
     colored_pawn_attack = (move.color == :white ? @w_pawn_attacks : @b_pawn_attacks)
     self_color_BB = get_occupied_by_color(move.color)
-    enemy_color = (move.color == :white ? :black : :white)
+    enemy_color = get_enemy_color(move.color)
     enemy_color_BB = get_occupied_by_color(enemy_color)
     pawn_column_mask = get_pawn_column_mask(move.from_offset)
     to_BB = 1 << (63 - move.to_offset)
@@ -195,11 +195,15 @@ class Chessboard
     @color_BB[color] & @occupied_BB
   end
 
+  def get_enemy_color(self_color)
+    self_color == :white ? :black : :white
+  end
+
   def in_check?(color)
-    enemy_color = (color == :white ? :black : :white)
+    enemy_color = get_enemy_color(color)
     colored_king_BB = @piece_BB[:king] & @color_BB[color]
-    threatened_squares = get_threats_by_color(enemy_color)
-    return true if colored_king_BB & threatened_squares != 0
+    threat_BB = get_threats_by_color(enemy_color)
+    return true if colored_king_BB & threat_BB != 0
     false
   end
 

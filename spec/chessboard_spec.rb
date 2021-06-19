@@ -360,7 +360,7 @@ describe Chessboard do
   describe '#in_check?' do
     subject(:check_board) { described_class.new }
 
-    it 'returns true if king is in check by an opposing ray' do
+    xit 'returns true if king is in check by an opposing ray' do
       check_board.piece_BB[:pawn] = 0x0000100800000000
       check_board.piece_BB[:bishop] = 0
       check_board.piece_BB[:knight] = 0x0000000000900000
@@ -382,7 +382,7 @@ describe Chessboard do
       expect(white_check).to be(true)
     end
 
-    it 'returns true if king is in check by a nonray piece' do
+    xit 'returns true if king is in check by a nonray piece' do
       check_board.piece_BB[:pawn] = 0x0040100800000000
       check_board.piece_BB[:bishop] = 0
       check_board.piece_BB[:knight] = 0x0000000000900000
@@ -404,7 +404,7 @@ describe Chessboard do
       expect(white_check).to be(true)
     end
 
-    it 'returns false if king is not in check' do
+    xit 'returns false if king is not in check' do
       check_board.piece_BB[:pawn] = 0x0000000028000000
       check_board.piece_BB[:bishop] = 0x0000000000000400
       check_board.piece_BB[:knight] = 0x0000000400000000
