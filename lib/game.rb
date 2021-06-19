@@ -16,7 +16,12 @@ class Game
       next if move.nil?
       next unless @board.legal_move?(move)
       @board.make_move(move)
-      switch_color
+      if @board.in_check?(@color)
+        puts 'Invalid move, king is in check'
+        @board.undo_move
+      else
+        switch_color
+      end
     end
   end
 
