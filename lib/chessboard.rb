@@ -100,8 +100,9 @@ class Chessboard
     legal_move_lambda = -> { self.send("legal_#{move.piece}_rays", move.from_offset, @pseudo_ray_attacks, @occupied_BB) }
     self_color_BB = get_occupied_by_color(move.color)
     to_BB = 1 << (63 - move.to_offset)
-    legal_rays = legal_move_lambda.call
-    return true if (legal_rays & to_BB != 0) && 
+    legal_rays_hash = legal_move_lambda.call
+    legal_rays_BB = legal_rays_hash.values.reduce(0) { |threat_BB, threat| threat_BB |= threat }
+    return true if (legal_rays_BB & to_BB != 0) && 
                    (to_BB & self_color_BB == 0)
     false
   end
