@@ -136,7 +136,7 @@ describe Chessboard do
     subject(:legal_move_board) { described_class.new }
 
     describe '#legal_ray_move?' do
-      it 'returns true on legal quiet move with a queen' do
+      xit 'returns true on legal quiet move with a queen' do
         move = Move.new(42, 21, :queen, :white)
         legal_move_board.piece_BB[:queen] = 0x0000000000200000 # queen on C3
         legal_move_board.color_BB[:white] |= 0x0000000000200000
@@ -146,7 +146,7 @@ describe Chessboard do
         expect(result).to be(true)
       end
 
-      it 'returns true on legal capture with a queen' do
+      xit 'returns true on legal capture with a queen' do
         move = Move.new(42, 14, :queen, :white)
         legal_move_board.piece_BB[:queen] = 0x0000000000200000 # queen on C3
         legal_move_board.color_BB[:white] |= 0x0000000000200000
@@ -156,7 +156,7 @@ describe Chessboard do
         expect(result).to be(true)
       end
 
-      it 'returns false on illegal quiet move with a queen'  do
+      xit 'returns false on illegal quiet move with a queen'  do
         move = Move.new(42, 19, :queen, :white)
         legal_move_board.piece_BB[:queen] = 0x0000000000200000 # queen on C3
         legal_move_board.color_BB[:white] |= 0x0000000000200000
@@ -166,7 +166,7 @@ describe Chessboard do
         expect(result).to be(false)
       end
 
-      it 'returns false on illegal capture with a queen' do
+      xit 'returns false on illegal capture with a queen' do
         move = Move.new(42, 50, :queen, :white)
         legal_move_board.piece_BB[:queen] = 0x0000000000200000 # queen on C3
         legal_move_board.color_BB[:white] |= 0x0000000000200000

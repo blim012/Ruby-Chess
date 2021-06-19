@@ -99,7 +99,8 @@ describe Ray_Attack do
         pseudo_ray_attacks[3][44] = 0x0000000000070000 # east
         pseudo_ray_attacks[5][44] = 0x0000000000000808 # south
         pseudo_ray_attacks[7][44] = 0x0000000000F00000 # west
-        result = rook_ray_attack.legal_rook_rays(44, pseudo_ray_attacks, occupied_BB)
+        threat_hash = rook_ray_attack.legal_rook_rays(44, pseudo_ray_attacks, occupied_BB)
+        result = threat_hash.values.reduce(0) { |threat_BB, threat| threat_BB |= threat }
 
         expect(result).to eq(0x0008080808170808)
       end
@@ -115,7 +116,9 @@ describe Ray_Attack do
         pseudo_ray_attacks[4][44] = 0x0000000000000402 # southeast
         pseudo_ray_attacks[6][44] = 0x0000000000001020 # southwest
 
-        result = bishop_ray_attack.legal_bishop_rays(44, pseudo_ray_attacks, occupied_BB)
+        threat_hash = bishop_ray_attack.legal_bishop_rays(44, pseudo_ray_attacks, occupied_BB)
+        result = threat_hash.values.reduce(0) { |threat_BB, threat| threat_BB |= threat }
+
         expect(result).to eq(0x12214001402)
       end
     end
@@ -139,7 +142,11 @@ describe Ray_Attack do
         bitboard = 0x0000000020080000
         occupied = 0x6FCA11A4C011F175
 
-        result = piece_rays.get_legal_rays(piece, bitboard, pseudo_ray_attacks, occupied)
+        threat_hash = piece_rays.get_legal_rays(piece, bitboard, pseudo_ray_attacks, occupied)
+        result = 0
+        threat_hash.values.reduce(result) do |threat_BB, threat|
+          result |= threat.values.reduce(0) { |threat_BB, threat| threat_BB |= threat }
+        end
 
         expect(result).to eq(0x204897214509402)
       end
