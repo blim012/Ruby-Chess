@@ -96,6 +96,42 @@ describe Chessboard do
     end
   end
 
+  describe '#undo_move' do
+    subject(:undo_move_board) { described_class.new }
+
+    it 'successfully undoes a quiet move' do
+      move = Move.new(50, 34, :pawn, :white)
+      initial_piece_BB = undo_move_board.piece_BB.clone
+      initial_color_BB = undo_move_board.color_BB.clone
+      initial_occupied_BB = undo_move_board.occupied_BB
+      undo_move_board.make_move(move)
+      undo_move_board.undo_move
+      after_piece_BB = undo_move_board.piece_BB
+      after_color_BB = undo_move_board.color_BB
+      after_occupied_BB = undo_move_board.occupied_BB
+
+      expect(after_piece_BB).to eq(initial_piece_BB)
+      expect(after_color_BB).to eq(initial_color_BB)
+      expect(after_occupied_BB).to eq(initial_occupied_BB)
+    end
+    
+    it 'successfully undoes a capture' do
+      move = Move.new(56, 8, :rook, :white, :pawn, :black)
+      initial_piece_BB = undo_move_board.piece_BB.clone
+      initial_color_BB = undo_move_board.color_BB.clone
+      initial_occupied_BB = undo_move_board.occupied_BB
+      undo_move_board.make_move(move)
+      undo_move_board.undo_move
+      after_piece_BB = undo_move_board.piece_BB
+      after_color_BB = undo_move_board.color_BB
+      after_occupied_BB = undo_move_board.occupied_BB
+
+      expect(after_piece_BB).to eq(initial_piece_BB)
+      expect(after_color_BB).to eq(initial_color_BB)
+      expect(after_occupied_BB).to eq(initial_occupied_BB)
+    end
+  end
+
   context 'when testing the legality of a move' do
     subject(:legal_move_board) { described_class.new }
 

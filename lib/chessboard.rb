@@ -150,6 +150,13 @@ class Chessboard
     @color_BB[move.cap_color] ^= to_BB unless move.cap_color.nil?
     @occupied_BB ^= from_BB
     @occupied_BB |= to_BB
+    @prev_move = move
+  end
+
+  def undo_move
+    make_move(@prev_move)
+    # unset the destination bit if there was no capture
+    @occupied_BB ^= (1 << (63 - @prev_move.to_offset)) if @prev_move.cap_piece.nil? 
   end
 
   def get_threats_by_color(color)
