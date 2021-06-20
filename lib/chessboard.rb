@@ -160,26 +160,6 @@ class Chessboard
     @occupied_BB ^= (1 << (63 - @prev_move.to_offset)) if @prev_move.cap_piece.nil? 
   end
 
-  def get_threats_by_color(color)
-    colored_pieces = get_pieces_by_color(color)
-    get_all_ray_threats(colored_pieces) | get_all_nonray_threats(colored_pieces, color)
-  end
-
-  def get_all_ray_threats(colored_pieces)
-    colored_bishop_threats = get_legal_rays('bishop', colored_pieces[:bishop], @pseudo_ray_attacks, @occupied_BB)
-    colored_rook_threats = get_legal_rays('rook', colored_pieces[:rook], @pseudo_ray_attacks, @occupied_BB)
-    colored_queen_threats = get_legal_rays('queen', colored_pieces[:queen], @pseudo_ray_attacks, @occupied_BB)
-    colored_bishop_threats | colored_rook_threats | colored_queen_threats
-  end
-
-  def get_all_nonray_threats(colored_pieces, color)
-    colored_pawn_attack = (color == :white ? @w_pawn_attacks : @b_pawn_attacks)
-    colored_pawn_threats = pawn_threats(colored_pieces[:pawn], colored_pawn_attack)
-    colored_knight_threats = knight_threats(colored_pieces[:knight], @knight_attacks)
-    colored_king_threats = king_threats(colored_pieces[:king], @king_attacks)
-    colored_pawn_threats | colored_knight_threats | colored_king_threats
-  end
-
   def get_pieces_by_color(color)
     occupied_color_BB = get_occupied_by_color(color)
     colored_pieces = {}
@@ -192,20 +172,16 @@ class Chessboard
     colored_pieces
   end
 
-  def get_occupied_by_color(color)
-    @color_BB[color] & @occupied_BB
-  end
-
-  def get_enemy_color(self_color)
-    self_color == :white ? :black : :white
-  end
-
   def in_check?(color)
-    enemy_color = get_enemy_color(color)
-    colored_king_BB = @piece_BB[:king] & @color_BB[color]
-    threat_BB = get_threats_by_color(enemy_color)
-    return true if colored_king_BB & threat_BB != 0
-    false
+    king_attackers_info = find_king_attackers(color)
+    return false if king_attackers_info[:num_threats] == 0
+    true
+
+    #enemy_color = get_enemy_color(color)
+    #colored_king_BB = @piece_BB[:king] & @color_BB[color]
+    #threat_BB = get_threats_by_color(enemy_color)
+    #return true if colored_king_BB & threat_BB != 0
+    #false
   end
 
   def print_board
@@ -246,5 +222,87 @@ class Chessboard
       puts ''
     end
     puts ''
+  end
+
+  private
+
+  def get_threats_by_color(color)
+    colored_pieces = get_pieces_by_color(color)
+    ray_threats = get_all_ray_threats(colored_pieces)
+    nonray_threats = get_all_nonray_threats(colored_pieces, color)
+    ray_threats.merge(nonray_threats)
+  end
+
+  def get_all_ray_threats(colored_pieces)
+    ray_threats = {}
+    colored_bishop_threats = get_legal_rays('bishop', colored_pieces[:bishop], @pseudo_ray_attacks, @occupied_BB)
+    colored_rook_threats = get_legal_rays('rook', colored_pieces[:rook], @pseudo_ray_attacks, @occupied_BB)
+    colored_queen_threats = get_legal_rays('queen', colored_pieces[:queen], @pseudo_ray_attacks, @occupied_BB)
+    ray_threats[:bishop] = colored_bishop_threats
+    ray_threats[:rook] = colored_rook_threats
+    ray_threats[:queen] = colored_queen_threats
+    ray_threats 
+  end
+
+  def get_all_nonray_threats(colored_pieces, color)
+    nonray_threats = {}
+    colored_pawn_attack = (color == :white ? @w_pawn_attacks : @b_pawn_attacks)
+    colored_pawn_threats = pawn_threats(colored_pieces[:pawn], colored_pawn_attack)
+    colored_knight_threats = knight_threats(colored_pieces[:knight], @knight_attacks)
+    colored_king_threats = king_threats(colored_pieces[:king], @king_attacks)
+    nonray_threats[:pawn] = colored_pawn_threats 
+    nonray_threats[:knight] = colored_knight_threats
+    nonray_threats[:king] = colored_king_threats
+    nonray_threats
+  end
+
+  # Generates the bitboard of blocks/captures needed to protect the king, and
+  # the number of enemy pieces checking the king.
+  def find_king_attackers(king_color)
+    colored_king_BB = @piece_BB[:king] & @color_BB[king_color]
+    enemy_color = get_enemy_color(king_color)
+    king_threats = get_threats_by_color(enemy_color)
+
+    king_attackers_info = {num_threats: 0, block_capture_BB: 0}
+    king_threats.values.each do |threat_hash|
+      attacker_info = get_king_attacker_info(colored_king_BB, threat_hash)
+      king_attackers_info[:num_threats] += attacker_info[:num_threats]
+      king_attackers_info[:block_capture_BB] |= attacker_info[:block_capture_BB]
+    end
+    
+    king_attackers_info
+  end
+
+  def get_king_attacker_info(colored_king_BB, threat_hash)
+    num_threats = 0
+    block_capture_BB = 0
+    threat_hash.each do |square, threat|
+      if threat.is_a?(Hash) #ray threats
+        threat.each do |dir8, ray_threat|
+          unless colored_king_BB & ray_threat == 0
+            block_capture_BB |= ray_threat
+            block_capture_BB |= square
+            num_threats += 1
+            break
+          end
+        end
+      else
+        unless colored_king_BB & threat == 0
+          block_capture_BB |= threat
+          block_capture_BB |= square
+          num_threats += 1
+        end
+      end
+    end
+
+    {num_threats: num_threats, block_capture_BB: block_capture_BB}
+  end
+
+  def get_occupied_by_color(color)
+    @color_BB[color] & @occupied_BB
+  end
+
+  def get_enemy_color(self_color)
+    self_color == :white ? :black : :white
   end
 end
