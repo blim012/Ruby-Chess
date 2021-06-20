@@ -11,6 +11,7 @@ class Game
   def play
     loop do
       @board.print_board
+      break if @board.checkmate?(@color)
       src_dest = get_input
       move = @board.generate_move(src_dest, @color)
       next if move.nil?
@@ -23,6 +24,8 @@ class Game
         switch_color
       end
     end
+
+    puts "#{@color} wins!"
   end
 
   private

@@ -426,4 +426,140 @@ describe Chessboard do
       expect(white_check).to be(false)
     end
   end
+
+  describe '#checkmate?' do
+    subject(:checkmate_board) { described_class.new }
+
+    it 'returns false when king is not in check' do
+      # Initial board state                                                                                                 
+      expect(checkmate_board.checkmate?(:white)).to be(false)
+    end
+
+    it 'returns false when the king is in check but can move out of check' do
+      checkmate_board.piece_BB[:pawn] = 0
+      checkmate_board.piece_BB[:bishop] = 0x0000040000000000
+      checkmate_board.piece_BB[:knight] = 0x0000000000800010
+      checkmate_board.piece_BB[:rook] = 0x0000084000000000
+      checkmate_board.piece_BB[:queen] = 0
+      checkmate_board.piece_BB[:king] = 0x0000000010000000
+
+      checkmate_board.color_BB[:white] = 0x0000000010000000
+      checkmate_board.color_BB[:black] = 0x00000C4000800010
+
+      checkmate_board.occupied_BB = checkmate_board.piece_BB[:pawn] |
+                                    checkmate_board.piece_BB[:bishop] |
+                                    checkmate_board.piece_BB[:knight] |
+                                    checkmate_board.piece_BB[:rook] |
+                                    checkmate_board.piece_BB[:queen] |
+                                    checkmate_board.piece_BB[:king]
+
+      expect(checkmate_board.checkmate?(:white)).to be(false)
+    end
+
+    it 'returns false when the king cannot move but can be blocked by an allied ray piece' do
+      checkmate_board.piece_BB[:pawn] = 0
+      checkmate_board.piece_BB[:bishop] = 0x0000040000000000
+      checkmate_board.piece_BB[:knight] = 0x0000000000800010
+      checkmate_board.piece_BB[:rook] = 0x0000084000000000
+      checkmate_board.piece_BB[:queen] = 0x0000000000000100
+      checkmate_board.piece_BB[:king] = 0x0000000010001000
+
+      checkmate_board.color_BB[:white] = 0x0000000010000100
+      checkmate_board.color_BB[:black] = 0x00000C4000805010
+
+      checkmate_board.occupied_BB = checkmate_board.piece_BB[:pawn] |
+                                    checkmate_board.piece_BB[:bishop] |
+                                    checkmate_board.piece_BB[:knight] |
+                                    checkmate_board.piece_BB[:rook] |
+                                    checkmate_board.piece_BB[:queen] |
+                                    checkmate_board.piece_BB[:king]
+
+      expect(checkmate_board.checkmate?(:white)).to be(false)
+    end
+
+    it 'returns false when the king cannot move but can be blocked by an allied nonray piece' do
+      checkmate_board.piece_BB[:pawn] = 0
+      checkmate_board.piece_BB[:bishop] = 0x0000040000000000
+      checkmate_board.piece_BB[:knight] = 0x0000000002800010
+      checkmate_board.piece_BB[:rook] = 0x0000084000000000
+      checkmate_board.piece_BB[:queen] = 0
+      checkmate_board.piece_BB[:king] = 0x0000000010001000
+
+      checkmate_board.color_BB[:white] = 0x0000000012000000
+      checkmate_board.color_BB[:black] = 0x00000C4000801010
+
+      checkmate_board.occupied_BB = checkmate_board.piece_BB[:pawn] |
+                                    checkmate_board.piece_BB[:bishop] |
+                                    checkmate_board.piece_BB[:knight] |
+                                    checkmate_board.piece_BB[:rook] |
+                                    checkmate_board.piece_BB[:queen] |
+                                    checkmate_board.piece_BB[:king]
+
+      expect(checkmate_board.checkmate?(:white)).to be(false)
+    end
+
+    it 'returns true when king is in checkmate due to a discovered check' do
+      checkmate_board.piece_BB[:pawn] = 0
+      checkmate_board.piece_BB[:bishop] = 0x0000040000000000
+      checkmate_board.piece_BB[:knight] = 0x0000000002800010
+      checkmate_board.piece_BB[:rook] = 0x0000084000000000
+      checkmate_board.piece_BB[:queen] = 0x0000000001000000
+      checkmate_board.piece_BB[:king] = 0x0000000010001000
+
+      checkmate_board.color_BB[:white] = 0x0000000012000000
+      checkmate_board.color_BB[:black] = 0x00000C4001801010
+
+      checkmate_board.occupied_BB = checkmate_board.piece_BB[:pawn] |
+                                    checkmate_board.piece_BB[:bishop] |
+                                    checkmate_board.piece_BB[:knight] |
+                                    checkmate_board.piece_BB[:rook] |
+                                    checkmate_board.piece_BB[:queen] |
+                                    checkmate_board.piece_BB[:king]
+
+      expect(checkmate_board.checkmate?(:white)).to be(true)
+    end
+
+    it 'returns true when the king is in checkmate from a single enemy checking piece' do
+      checkmate_board.piece_BB[:pawn] = 0
+      checkmate_board.piece_BB[:bishop] = 0x0000040000000000
+      checkmate_board.piece_BB[:knight] = 0x0000000000800010
+      checkmate_board.piece_BB[:rook] = 0x0000084000000000
+      checkmate_board.piece_BB[:queen] = 0x0000000000010000
+      checkmate_board.piece_BB[:king] = 0x0000000010001000
+
+      checkmate_board.color_BB[:white] = 0x0000000010010000
+      checkmate_board.color_BB[:black] = 0x00000C4000801010
+
+      checkmate_board.occupied_BB = checkmate_board.piece_BB[:pawn] |
+                                    checkmate_board.piece_BB[:bishop] |
+                                    checkmate_board.piece_BB[:knight] |
+                                    checkmate_board.piece_BB[:rook] |
+                                    checkmate_board.piece_BB[:queen] |
+                                    checkmate_board.piece_BB[:king]
+
+      expect(checkmate_board.checkmate?(:white)).to be(true)
+    end
+
+    it 'returns true when the king cannot move and is in double check' do
+      checkmate_board.piece_BB[:pawn] = 0x0000202000000000
+      checkmate_board.piece_BB[:bishop] = 0x0000040000000000
+      checkmate_board.piece_BB[:knight] = 0x0000000000800010
+      checkmate_board.piece_BB[:rook] = 0x0000084000000020
+      checkmate_board.piece_BB[:queen] = 0x0000000000000100
+      checkmate_board.piece_BB[:king] = 0x0000000010001000
+
+      checkmate_board.color_BB[:white] = 0x0000000010000120
+      checkmate_board.color_BB[:black] = 0x00002C6000805010
+
+      checkmate_board.occupied_BB = checkmate_board.piece_BB[:pawn] |
+                                    checkmate_board.piece_BB[:bishop] |
+                                    checkmate_board.piece_BB[:knight] |
+                                    checkmate_board.piece_BB[:rook] |
+                                    checkmate_board.piece_BB[:queen] |
+                                    checkmate_board.piece_BB[:king]
+
+      expect(checkmate_board.checkmate?(:white)).to be(true)
+    end
+  end
+
 end

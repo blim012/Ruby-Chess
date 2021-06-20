@@ -176,12 +176,50 @@ class Chessboard
     king_attackers_info = find_king_attackers(color)
     return false if king_attackers_info[:num_threats] == 0
     true
+  end
 
-    #enemy_color = get_enemy_color(color)
-    #colored_king_BB = @piece_BB[:king] & @color_BB[color]
-    #threat_BB = get_threats_by_color(enemy_color)
-    #return true if colored_king_BB & threat_BB != 0
-    #false
+  def checkmate?(color)
+    king_attackers_info = find_king_attackers(color)
+    return false if king_attackers_info[:num_threats] == 0 # no pieces attacking king
+    return false unless king_pinned?(color) # return false if king can move
+    return true if king_attackers_info[:num_threats] > 1 # if king pinned and > 1 attackers
+
+    puts 'checking if you can block checkmate'
+    self_color_moves = get_threats_by_color(color)
+    self_color_moves.each do |piece, threat_hash|
+      next if threat_hash.empty?
+      threat_hash.each do |square, threat_BB|
+        if threat_BB.is_a?(Hash)
+          threat_BB.values.each do |ray_threat_BB|
+            square_to_block = ray_threat_BB & king_attackers_info[:block_capture_BB] 
+            unless square_to_block == 0
+              src = 64 - square.bit_length
+              dest = 64 - square_to_block.bit_length
+              move = generate_move([src, dest], color)
+              make_move(move)
+              check = in_check?(color)
+              undo_move
+              return false unless check == true # return false unless discovered check
+            end
+          end
+        else
+          square_to_block = threat_BB & king_attackers_info[:block_capture_BB]
+          unless square_to_block == 0
+            src = 64 - square.bit_length
+            dest = 64 - square_to_block.bit_length
+            move = generate_move([src, dest], color)
+            if piece == :pawn # Check for pawn capture
+              next unless legal_pawn_move?(move)
+            end
+            make_move(move)
+            check = in_check?(color)
+            undo_move
+            return false unless check == true # return false unless discovered check
+          end
+        end
+      end
+    end
+    true
   end
 
   def print_board
@@ -225,6 +263,23 @@ class Chessboard
   end
 
   private
+
+  def threat_hash_to_all_threat_BB(threat_hash)
+    threat_hash.values.reduce(0) do |all_threat_BB, threat|
+      threat.values.each do |threat_BB|
+        bitboard = 0
+        if threat_BB.is_a?(Hash) # ray threat
+          bitboard = threat_BB.values.reduce(0) do |ray_threat_BB, ray_threat|
+            ray_threat_BB |= ray_threat
+          end
+        else
+          bitboard = threat_BB # nonray threat
+        end
+        all_threat_BB |= bitboard unless bitboard.nil?
+      end
+      all_threat_BB
+    end
+  end
 
   def get_threats_by_color(color)
     colored_pieces = get_pieces_by_color(color)
@@ -281,6 +336,7 @@ class Chessboard
         threat.each do |dir8, ray_threat|
           unless colored_king_BB & ray_threat == 0
             block_capture_BB |= ray_threat
+            block_capture_BB ^= colored_king_BB
             block_capture_BB |= square
             num_threats += 1
             break
@@ -288,7 +344,6 @@ class Chessboard
         end
       else
         unless colored_king_BB & threat == 0
-          block_capture_BB |= threat
           block_capture_BB |= square
           num_threats += 1
         end
@@ -296,6 +351,19 @@ class Chessboard
     end
 
     {num_threats: num_threats, block_capture_BB: block_capture_BB}
+  end
+
+  def king_pinned?(color)
+    enemy_color = get_enemy_color(color)
+    threat_hash = get_threats_by_color(enemy_color)
+    threat_BB = threat_hash_to_all_threat_BB(threat_hash)
+    self_color_BB = get_occupied_by_color(color)
+    illegal_king_move_BB = threat_BB | self_color_BB
+    colored_king_BB = @piece_BB[:king] & @color_BB[color]
+    king_square = find_squares(colored_king_BB)[0]
+    king_moves_BB = @king_attacks[king_square]
+    return true if king_moves_BB == (king_moves_BB & illegal_king_move_BB)
+    false
   end
 
   def get_occupied_by_color(color)
