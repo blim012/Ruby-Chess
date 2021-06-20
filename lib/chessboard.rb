@@ -183,41 +183,20 @@ class Chessboard
     return false if king_attackers_info[:num_threats] == 0 # no pieces attacking king
     return false unless king_pinned?(color) # return false if king can move
     return true if king_attackers_info[:num_threats] > 1 # if king pinned and > 1 attackers
+    return false unless no_legal_move_to_bitboard?(king_attackers_info[:block_capture_BB], color) # Check if it is possible to block
+    true
+  end
 
-    self_color_moves = get_threats_by_color(color)
-    self_color_moves.each do |piece, threat_hash| # Check if it is possible to block
-      next if threat_hash.empty?
-      threat_hash.each do |square, threat_BB|
-        if threat_BB.is_a?(Hash)
-          threat_BB.values.each do |ray_threat_BB|
-            square_to_block = ray_threat_BB & king_attackers_info[:block_capture_BB] 
-            unless square_to_block == 0
-              src = 64 - square.bit_length
-              dest = 64 - square_to_block.bit_length
-              move = generate_move([src, dest], color)
-              make_move(move)
-              check = in_check?(color)
-              undo_move
-              return false unless check == true # return false unless discovered check
-            end
-          end
-        else
-          square_to_block = threat_BB & king_attackers_info[:block_capture_BB]
-          unless square_to_block == 0
-            src = 64 - square.bit_length
-            dest = 64 - square_to_block.bit_length
-            move = generate_move([src, dest], color)
-            if piece == :pawn # Check for pawn capture
-              next unless legal_pawn_move?(move)
-            end
-            make_move(move)
-            check = in_check?(color)
-            undo_move
-            return false unless check == true # return false unless discovered check
-          end
-        end
-      end
-    end
+  def stalemate?(color)
+    return false if in_check?(color)
+    return false unless king_pinned?(color)
+
+    color_threat_hash = get_threats_by_color(color)
+    color_threat_BB = threat_hash_to_all_threat_BB(color_threat_hash)
+    occupied_color_BB = get_occupied_by_color(color)
+    color_blocked_BB = color_threat_BB & occupied_color_BB
+    potential_moves_BB = color_threat_BB ^ color_blocked_BB
+    return false unless no_legal_move_to_bitboard?(potential_moves_BB, color)
     true
   end
 
@@ -325,6 +304,46 @@ class Chessboard
     end
     
     king_attackers_info
+  end
+
+  # Returns true if a piece of a given color can move to a square on the given
+  # bitboard, and returns false otherwise
+  def no_legal_move_to_bitboard?(bitboard, color)
+    self_color_moves = get_threats_by_color(color)
+    self_color_moves.each do |piece, threat_hash| 
+      next if threat_hash.empty?
+      threat_hash.each do |square, threat_BB|
+        if threat_BB.is_a?(Hash)
+          threat_BB.values.each do |ray_threat_BB|
+            square_to_block = ray_threat_BB & bitboard 
+            unless square_to_block == 0
+              src = 64 - square.bit_length
+              dest = 64 - square_to_block.bit_length
+              move = generate_move([src, dest], color)
+              make_move(move)
+              check = in_check?(color)
+              undo_move
+              return false unless check == true # return false unless discovered check
+            end
+          end
+        else
+          square_to_block = threat_BB & bitboard
+          unless square_to_block == 0
+            src = 64 - square.bit_length
+            dest = 64 - square_to_block.bit_length
+            move = generate_move([src, dest], color)
+            if piece == :pawn # Check for pawn capture
+              next unless legal_pawn_move?(move)
+            end
+            make_move(move)
+            check = in_check?(color)
+            undo_move
+            return false unless check == true # return false unless discovered check
+          end
+        end
+      end
+    end
+    true
   end
 
   def get_king_attacker_info(colored_king_BB, threat_hash)

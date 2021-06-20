@@ -562,4 +562,112 @@ describe Chessboard do
     end
   end
 
+  describe '#statemate?' do
+    subject(:stalemate_board) { described_class.new }
+
+    it 'returns false if the king is in check' do
+      stalemate_board.piece_BB[:pawn] = 0
+      stalemate_board.piece_BB[:bishop] = 0x0000040000000000
+      stalemate_board.piece_BB[:knight] = 0x0000000000800010
+      stalemate_board.piece_BB[:rook] = 0x0000084000000000
+      stalemate_board.piece_BB[:queen] = 0
+      stalemate_board.piece_BB[:king] = 0x0000000010000000
+
+      stalemate_board.color_BB[:white] = 0x0000000010000000
+      stalemate_board.color_BB[:black] = 0x00000C4000800010
+
+      stalemate_board.occupied_BB = stalemate_board.piece_BB[:pawn] |
+                                    stalemate_board.piece_BB[:bishop] |
+                                    stalemate_board.piece_BB[:knight] |
+                                    stalemate_board.piece_BB[:rook] |
+                                    stalemate_board.piece_BB[:queen] |
+                                    stalemate_board.piece_BB[:king]
+
+      expect(stalemate_board.stalemate?(:white)).to be(false)
+    end
+
+    it 'returns false if the king can move' do
+      stalemate_board.piece_BB[:pawn] = 0x0010102000000000
+      stalemate_board.piece_BB[:bishop] = 0
+      stalemate_board.piece_BB[:knight] = 0x0000000008000000
+      stalemate_board.piece_BB[:rook] = 0
+      stalemate_board.piece_BB[:queen] = 0
+      stalemate_board.piece_BB[:king] = 0x0000000010000000
+
+      stalemate_board.color_BB[:white] = 0x0000102018000000
+      stalemate_board.color_BB[:black] = 0x0010000000000000
+
+      stalemate_board.occupied_BB = stalemate_board.piece_BB[:pawn] |
+                                    stalemate_board.piece_BB[:bishop] |
+                                    stalemate_board.piece_BB[:knight] |
+                                    stalemate_board.piece_BB[:rook] |
+                                    stalemate_board.piece_BB[:queen] |
+                                    stalemate_board.piece_BB[:king]
+
+      expect(stalemate_board.stalemate?(:white)).to be(false)
+    end
+
+    it 'returns false if the king is pinned but other pieces can move' do
+      stalemate_board.piece_BB[:pawn] = 0x0010102000000000
+      stalemate_board.piece_BB[:bishop] = 0x0000000000008000
+      stalemate_board.piece_BB[:knight] = 0x0000000008000000
+      stalemate_board.piece_BB[:rook] = 0x0000000100010000
+      stalemate_board.piece_BB[:queen] = 0
+      stalemate_board.piece_BB[:king] = 0x0000000010000000
+
+      stalemate_board.color_BB[:white] = 0x0000102018000000
+      stalemate_board.color_BB[:black] = 0x0010000100018000
+
+      stalemate_board.occupied_BB = stalemate_board.piece_BB[:pawn] |
+                                    stalemate_board.piece_BB[:bishop] |
+                                    stalemate_board.piece_BB[:knight] |
+                                    stalemate_board.piece_BB[:rook] |
+                                    stalemate_board.piece_BB[:queen] |
+                                    stalemate_board.piece_BB[:king]
+
+      expect(stalemate_board.stalemate?(:white)).to be(false)
+    end
+
+    it 'returns true when no pieces can move and there is no discovered check' do
+      stalemate_board.piece_BB[:pawn] = 0x0010302000000000
+      stalemate_board.piece_BB[:bishop] = 0x0000000000008000
+      stalemate_board.piece_BB[:knight] = 0
+      stalemate_board.piece_BB[:rook] = 0x0000000100010000
+      stalemate_board.piece_BB[:queen] = 0
+      stalemate_board.piece_BB[:king] = 0x0000000014000000
+
+      stalemate_board.color_BB[:white] = 0x0000102010000000
+      stalemate_board.color_BB[:black] = 0x0010200104018000
+
+      stalemate_board.occupied_BB = stalemate_board.piece_BB[:pawn] |
+                                    stalemate_board.piece_BB[:bishop] |
+                                    stalemate_board.piece_BB[:knight] |
+                                    stalemate_board.piece_BB[:rook] |
+                                    stalemate_board.piece_BB[:queen] |
+                                    stalemate_board.piece_BB[:king]
+
+      expect(stalemate_board.stalemate?(:white)).to be(true)
+    end
+
+    it 'returns true when no pieces can move due to discovered check' do
+      stalemate_board.piece_BB[:pawn] = 0x0010302000000000
+      stalemate_board.piece_BB[:bishop] = 0x0000000000008000
+      stalemate_board.piece_BB[:knight] = 0x0000000008000000
+      stalemate_board.piece_BB[:rook] = 0x0000000100010000
+      stalemate_board.piece_BB[:queen] = 0x0000000001000000
+      stalemate_board.piece_BB[:king] = 0x0000000010000000
+
+      stalemate_board.color_BB[:white] = 0x0000102018000000
+      stalemate_board.color_BB[:black] = 0x0010200101018000
+
+      stalemate_board.occupied_BB = stalemate_board.piece_BB[:pawn] |
+                                    stalemate_board.piece_BB[:bishop] |
+                                    stalemate_board.piece_BB[:knight] |
+                                    stalemate_board.piece_BB[:rook] |
+                                    stalemate_board.piece_BB[:queen] |
+                                    stalemate_board.piece_BB[:king]
+
+      expect(stalemate_board.stalemate?(:white)).to be(true)
+    end
+  end
 end
