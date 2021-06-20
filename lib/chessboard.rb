@@ -184,9 +184,8 @@ class Chessboard
     return false unless king_pinned?(color) # return false if king can move
     return true if king_attackers_info[:num_threats] > 1 # if king pinned and > 1 attackers
 
-    puts 'checking if you can block checkmate'
     self_color_moves = get_threats_by_color(color)
-    self_color_moves.each do |piece, threat_hash|
+    self_color_moves.each do |piece, threat_hash| # Check if it is possible to block
       next if threat_hash.empty?
       threat_hash.each do |square, threat_BB|
         if threat_BB.is_a?(Hash)
