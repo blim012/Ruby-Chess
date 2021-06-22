@@ -12,6 +12,7 @@ class Game
     loop do
       @board.print_board
       break if @board.checkmate?(@color)
+      break if @board.stalemate?(@color)
       src_dest = get_input
       move = @board.generate_move(src_dest, @color)
       next if move.nil?
@@ -40,7 +41,8 @@ class Game
   end
 
   def check_input(input)
-    return nil if input.downcase.gsub(/\s+/, '').match(/[a-h][1-8][a-h][1-8]/).nil?
+    input = input.downcase.gsub(/\s+/, '')
+    return nil if input.match(/[a-h][1-8][a-h][1-8]/).nil?
     input
   end
 
