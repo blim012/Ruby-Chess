@@ -385,13 +385,14 @@ class Chessboard
   end
 
   def king_pinned?(color)
+    colored_king_BB = @piece_BB[:king] & @color_BB[color]
+    no_king_occupied_BB = @occupied_BB ^ colored_king_BB
     enemy_color = get_enemy_color(color)
     enemy_pieces = get_pieces_by_color(enemy_color)
-    threat_hash = get_threats_by_color(enemy_pieces, enemy_color, @occupied_BB)
+    threat_hash = get_threats_by_color(enemy_pieces, enemy_color, no_king_occupied_BB)
     threat_BB = threat_hash_to_all_threat_BB(threat_hash)
     self_color_BB = get_occupied_by_color(color)
     illegal_king_move_BB = threat_BB | self_color_BB
-    colored_king_BB = @piece_BB[:king] & @color_BB[color]
     king_square = find_squares(colored_king_BB)[0]
     king_moves_BB = @king_attacks[king_square]
     return true if king_moves_BB == (king_moves_BB & illegal_king_move_BB)
