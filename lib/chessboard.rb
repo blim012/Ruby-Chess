@@ -2,10 +2,12 @@ require './lib/searchable.rb'
 require './lib/move.rb'
 require './lib/castle.rb'
 require './lib/board_threats.rb'
+require './lib/en_passant.rb'
 
 class Chessboard
   include Searchable
   include Castle
+  include En_Passant
   include Board_Threats
 
   attr_accessor :piece_BB, :color_BB, :occupied_BB
@@ -86,6 +88,7 @@ class Chessboard
       return false
     end
     update_castleable(move) if move.piece == :rook || move.piece == :king
+    update_en_passantable(move)
     true
   end
 
@@ -95,10 +98,16 @@ class Chessboard
       rook_move = get_rook_castle_move(move.color)
       make_move(king_move)
       make_move(rook_move)
-      @special_move = nil
     else # en passant
-
+      enemy_color = get_enemy_color(move.color)
+      en_passant_pawn_square_BB = get_en_passant_pawn_square_BB
+      @piece_BB[:pawn] ^= en_passant_pawn_square_BB
+      @color_BB[enemy_color] ^= en_passant_pawn_square_BB
+      @occupied_BB ^= en_passant_pawn_square_BB 
+      make_move(move)
     end
+
+    @special_move = nil
   end
 
   def legal_move?(move)
@@ -163,13 +172,18 @@ class Chessboard
     enemy_color_BB = get_occupied_by_color(enemy_color)
     pawn_column_mask = get_pawn_column_mask(move.from_offset)
     to_BB = 1 << (63 - move.to_offset)
+    return false unless colored_pawn_attack[move.from_offset] & to_BB != 0
     if to_BB & pawn_column_mask != 0 # Not a capture attempt
-      return true if (colored_pawn_attack[move.from_offset] & to_BB != 0) &&
-                     (to_BB & @occupied_BB == 0)
+      return true if to_BB & @occupied_BB == 0
     else # Capture attempt
-      return true if (colored_pawn_attack[move.from_offset] & to_BB != 0) &&
-                     (to_BB & self_color_BB == 0) &&
+      return true if (to_BB & self_color_BB == 0) &&
                      (to_BB & enemy_color_BB != 0)
+      # Check en passant
+      en_passant_cap_square_BB = get_en_passant_cap_square_BB
+      if (en_passant_cap_square_BB & to_BB != 0)
+        @special_move = :en_passant
+        return true
+      end
     end
     false
   end
