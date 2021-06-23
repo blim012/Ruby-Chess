@@ -16,15 +16,9 @@ class Game
       src_dest = get_input
       move = @board.generate_move(src_dest, @color)
       next if move.nil?
-      switch_color if @board.move_piece(move)
-      #next unless @board.legal_move?(move)
-      #@board.make_move(move)
-      #if @board.in_check?(@color)
-      #  puts 'Invalid move, king is in check'
-      #  @board.undo_move
-      #else
-      #  switch_color
-      #end
+      next unless @board.move_piece(move)
+      @board.promotion(@color)
+      switch_color
     end
 
     puts "#{@color} wins!"

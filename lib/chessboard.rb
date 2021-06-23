@@ -76,40 +76,6 @@ class Chessboard
     Move.new(src, dest, piece_type[0], piece_type[1], cap_piece_type[0], cap_piece_type[1])
   end
 
-  def move_piece(move)
-    return false unless legal_move?(move)
-    if @special_move.nil?
-      make_move(move)
-    else 
-      move_piece_special(move)
-    end
-    if in_check?(move.color)
-      undo_move(move)
-      return false
-    end
-    update_castleable(move) if move.piece == :rook || move.piece == :king
-    update_en_passantable(move)
-    true
-  end
-
-  def move_piece_special(move)
-    if @special_move == :castle
-      king_move = get_king_castle_move(move.color)
-      rook_move = get_rook_castle_move(move.color)
-      make_move(king_move)
-      make_move(rook_move)
-    else # en passant
-      enemy_color = get_enemy_color(move.color)
-      en_passant_pawn_square_BB = get_en_passant_pawn_square_BB
-      @piece_BB[:pawn] ^= en_passant_pawn_square_BB
-      @color_BB[enemy_color] ^= en_passant_pawn_square_BB
-      @occupied_BB ^= en_passant_pawn_square_BB 
-      make_move(move)
-    end
-
-    @special_move = nil
-  end
-
   def legal_move?(move)
     case move.piece
     when :bishop, :rook, :queen
@@ -188,6 +154,40 @@ class Chessboard
     false
   end
 
+  def move_piece(move)
+    return false unless legal_move?(move)
+    if @special_move.nil?
+      make_move(move)
+    else 
+      move_piece_special(move)
+    end
+    if in_check?(move.color)
+      undo_move
+      return false
+    end
+    update_castleable(move) if move.piece == :rook || move.piece == :king
+    update_en_passantable(move)
+    true
+  end
+
+  def move_piece_special(move)
+    if @special_move == :castle
+      king_move = get_king_castle_move(move.color)
+      rook_move = get_rook_castle_move(move.color)
+      make_move(king_move)
+      make_move(rook_move)
+    else # en passant
+      enemy_color = get_enemy_color(move.color)
+      en_passant_pawn_square_BB = get_en_passant_pawn_square_BB
+      @piece_BB[:pawn] ^= en_passant_pawn_square_BB
+      @color_BB[enemy_color] ^= en_passant_pawn_square_BB
+      @occupied_BB ^= en_passant_pawn_square_BB 
+      make_move(move)
+    end
+
+    @special_move = nil
+  end
+
   def make_move(move)
     from_BB = 1 << (63 - move.from_offset)
     to_BB = 1 << (63 - move.to_offset)
@@ -207,16 +207,14 @@ class Chessboard
     @occupied_BB ^= (1 << (63 - @prev_move.to_offset)) if @prev_move.cap_piece.nil? 
   end
 
-  def get_pieces_by_color(color)
-    occupied_color_BB = get_occupied_by_color(color)
-    colored_pieces = {}
-    colored_pieces[:bishop] = @piece_BB[:bishop] & occupied_color_BB
-    colored_pieces[:rook] = @piece_BB[:rook] & occupied_color_BB
-    colored_pieces[:queen] = @piece_BB[:queen] & occupied_color_BB
-    colored_pieces[:king] = @piece_BB[:king] & occupied_color_BB
-    colored_pieces[:knight] = @piece_BB[:knight] & occupied_color_BB
-    colored_pieces[:pawn] = @piece_BB[:pawn] & occupied_color_BB
-    colored_pieces
+  def promotion(color)
+    promotion_rank = (color == :white ? 0xFF00000000000000 : 0xFF)
+    colored_pieces = get_pieces_by_color(color)
+    promoted_pawn = colored_pieces[:pawn] & promotion_rank
+    return if promoted_pawn == 0
+    upgrade = select_promote
+    @piece_BB[:pawn] ^= promoted_pawn
+    @piece_BB[upgrade] |= promoted_pawn
   end
 
   def in_check?(color)
@@ -246,6 +244,18 @@ class Chessboard
     potential_moves_BB = color_threat_BB ^ color_blocked_BB
     return false unless no_legal_move_to_bitboard?(potential_moves_BB, color)
     true
+  end
+
+  def get_pieces_by_color(color)
+    occupied_color_BB = get_occupied_by_color(color)
+    colored_pieces = {}
+    colored_pieces[:bishop] = @piece_BB[:bishop] & occupied_color_BB
+    colored_pieces[:rook] = @piece_BB[:rook] & occupied_color_BB
+    colored_pieces[:queen] = @piece_BB[:queen] & occupied_color_BB
+    colored_pieces[:king] = @piece_BB[:king] & occupied_color_BB
+    colored_pieces[:knight] = @piece_BB[:knight] & occupied_color_BB
+    colored_pieces[:pawn] = @piece_BB[:pawn] & occupied_color_BB
+    colored_pieces
   end
 
   def print_board
@@ -394,5 +404,22 @@ class Chessboard
 
   def get_enemy_color(self_color)
     self_color == :white ? :black : :white
+  end
+
+  def select_promote
+    loop do
+      puts 'Choose your promotion: Q (queen), N (knight), R (rook), B (bishop)'
+      input = gets.chomp.downcase.gsub(/\s+/, '')
+      case input
+      when 'q', 'queen'
+          return :queen
+      when 'n', 'knight'
+          return :knight
+      when 'r', 'rook'
+          return :rook
+      when 'b', 'bishop'
+          return :bishop
+      end
+    end
   end
 end

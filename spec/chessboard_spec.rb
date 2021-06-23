@@ -670,4 +670,68 @@ describe Chessboard do
       expect(stalemate_board.stalemate?(:white)).to be(true)
     end
   end
+
+  describe '#promotion' do
+    subject(:promotion_board) { described_class.new }
+
+    before do
+      allow(promotion_board).to receive(:select_promote).and_return(:queen)
+    end
+
+    it 'does not promote a pawn if no pawn is in a promotion rank' do
+      # Initial board state
+      expect(promotion_board).not_to receive(:select_promote)
+      promotion_board.promotion(:white)
+    end
+
+    it 'promotes a white pawn if it is in the top rank' do
+      promotion_board.piece_BB[:pawn] = 0x8000000000000000
+      promotion_board.piece_BB[:bishop] = 0
+      promotion_board.piece_BB[:knight] = 0
+      promotion_board.piece_BB[:rook] = 0
+      promotion_board.piece_BB[:queen] = 0
+      promotion_board.piece_BB[:king] = 0
+
+      promotion_board.color_BB[:white] = 0x8000000000000000
+      promotion_board.color_BB[:black] = 0
+
+      promotion_board.occupied_BB = promotion_board.piece_BB[:pawn] |
+                                    promotion_board.piece_BB[:bishop] |
+                                    promotion_board.piece_BB[:knight] |
+                                    promotion_board.piece_BB[:rook] |
+                                    promotion_board.piece_BB[:queen] |
+                                    promotion_board.piece_BB[:king]
+
+      promotion_board.promotion(:white)
+      result = (promotion_board.piece_BB[:pawn] == 0 && 
+                promotion_board.piece_BB[:queen] == 0x8000000000000000)
+
+      expect(result).to be(true)
+    end
+
+    it 'promotes a black pawn if it is in the bottom rank' do
+      promotion_board.piece_BB[:pawn] = 1
+      promotion_board.piece_BB[:bishop] = 0
+      promotion_board.piece_BB[:knight] = 0
+      promotion_board.piece_BB[:rook] = 0
+      promotion_board.piece_BB[:queen] = 0
+      promotion_board.piece_BB[:king] = 0
+
+      promotion_board.color_BB[:white] = 0
+      promotion_board.color_BB[:black] = 1
+
+      promotion_board.occupied_BB = promotion_board.piece_BB[:pawn] |
+                                    promotion_board.piece_BB[:bishop] |
+                                    promotion_board.piece_BB[:knight] |
+                                    promotion_board.piece_BB[:rook] |
+                                    promotion_board.piece_BB[:queen] |
+                                    promotion_board.piece_BB[:king]
+
+      promotion_board.promotion(:black)
+      result = (promotion_board.piece_BB[:pawn] == 0 && 
+                promotion_board.piece_BB[:queen] == 1)
+
+      expect(result).to be(true)
+    end
+  end
 end
