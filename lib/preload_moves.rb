@@ -2,8 +2,7 @@
 # the piece is the only piece on the board.
 # This data is preloaded before the game begins
 
-# rename to Preload_Moves and make a class
-module Gen_Pseudo_Moves
+module Preload_Moves
   def gen_ray_attacks
     # returned as the container of all ray attacks
     # format: ray_attacks[8][64] for 8 directions and 64 squares

@@ -1,4 +1,4 @@
-require './lib/gen_pseudo_moves.rb'
+require './lib/preload_moves.rb'
 require './lib/nonray_attack.rb'
 require './lib/ray_attack.rb'
 require './lib/searchable.rb'
@@ -6,7 +6,7 @@ require './lib/move.rb'
 require './lib/castle.rb'
 
 class Chessboard
-  include Gen_Pseudo_Moves
+  include Preload_Moves
   include Ray_Attack
   include Nonray_Attack
   include Searchable

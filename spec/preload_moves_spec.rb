@@ -1,7 +1,7 @@
-require './lib/gen_pseudo_moves.rb'
+require './lib/preload_moves.rb'
 
-describe Gen_Pseudo_Moves do
-  let(:dummy_chessboard) { Class.new { include Gen_Pseudo_Moves } }
+describe Preload_Moves do
+  let(:dummy_chessboard) { Class.new { include Preload_Moves } }
 
   context 'when generating pseudo-legal piece moves' do
     describe '#gen_ray_attacks' do
