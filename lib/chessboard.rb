@@ -1,16 +1,12 @@
-require './lib/preload_moves.rb'
-require './lib/nonray_attack.rb'
-require './lib/ray_attack.rb'
 require './lib/searchable.rb'
 require './lib/move.rb'
 require './lib/castle.rb'
+require './lib/board_threats.rb'
 
 class Chessboard
-  include Preload_Moves
-  include Ray_Attack
-  include Nonray_Attack
   include Searchable
   include Castle
+  include Board_Threats
 
   attr_accessor :piece_BB, :color_BB, :occupied_BB
 
@@ -47,18 +43,11 @@ class Chessboard
                    @piece_BB[:rook] |
                    @piece_BB[:queen] |
                    @piece_BB[:king]
-    
-    # generate pseudo-legal bitboards ray attacks
-    @pseudo_ray_attacks = gen_ray_attacks
-
-    # generate non-ray attack bitboards
-    @knight_attacks = gen_knight_attacks
-    @king_attacks = gen_king_attacks
-    @w_pawn_attacks = gen_w_pawn_attacks
-    @b_pawn_attacks = gen_b_pawn_attacks
 
     @prev_move = nil
     @special_move = nil
+
+    init_pseudo_moves
   end
 
   # Returns the piece and color that is residing on a square
@@ -156,7 +145,8 @@ class Chessboard
 
   def legal_castle?(move)
     enemy_color = get_enemy_color(move.color)
-    threat_hash = get_threats_by_color(enemy_color)
+    enemy_pieces = get_pieces_by_color(enemy_color)
+    threat_hash = get_threats_by_color(enemy_pieces, enemy_color, @occupied_BB)
     enemy_threat_BB = threat_hash_to_all_threat_BB(threat_hash)
     return false unless castleable?(move, @occupied_BB, enemy_threat_BB)
     set_castle_attr(move)
@@ -234,7 +224,8 @@ class Chessboard
     return false if in_check?(color)
     return false unless king_pinned?(color)
 
-    color_threat_hash = get_threats_by_color(color)
+    colored_pieces = get_pieces_by_color(color)
+    color_threat_hash = get_threats_by_color(colored_pieces, color, @occupied_BB)
     color_threat_BB = threat_hash_to_all_threat_BB(color_threat_hash)
     occupied_color_BB = get_occupied_by_color(color)
     color_blocked_BB = color_threat_BB & occupied_color_BB
@@ -285,59 +276,13 @@ class Chessboard
 
   private
 
-  def threat_hash_to_all_threat_BB(threat_hash)
-    threat_hash.values.reduce(0) do |all_threat_BB, threat|
-      threat.values.each do |threat_BB|
-        bitboard = 0
-        if threat_BB.is_a?(Hash) # ray threat
-          bitboard = threat_BB.values.reduce(0) do |ray_threat_BB, ray_threat|
-            ray_threat_BB |= ray_threat
-          end
-        else
-          bitboard = threat_BB # nonray threat
-        end
-        all_threat_BB |= bitboard unless bitboard.nil?
-      end
-      all_threat_BB
-    end
-  end
-
-  def get_threats_by_color(color)
-    colored_pieces = get_pieces_by_color(color)
-    ray_threats = get_all_ray_threats(colored_pieces)
-    nonray_threats = get_all_nonray_threats(colored_pieces, color)
-    ray_threats.merge(nonray_threats)
-  end
-
-  def get_all_ray_threats(colored_pieces)
-    ray_threats = {}
-    colored_bishop_threats = get_legal_rays('bishop', colored_pieces[:bishop], @pseudo_ray_attacks, @occupied_BB)
-    colored_rook_threats = get_legal_rays('rook', colored_pieces[:rook], @pseudo_ray_attacks, @occupied_BB)
-    colored_queen_threats = get_legal_rays('queen', colored_pieces[:queen], @pseudo_ray_attacks, @occupied_BB)
-    ray_threats[:bishop] = colored_bishop_threats
-    ray_threats[:rook] = colored_rook_threats
-    ray_threats[:queen] = colored_queen_threats
-    ray_threats 
-  end
-
-  def get_all_nonray_threats(colored_pieces, color)
-    nonray_threats = {}
-    colored_pawn_attack = (color == :white ? @w_pawn_attacks : @b_pawn_attacks)
-    colored_pawn_threats = pawn_threats(colored_pieces[:pawn], colored_pawn_attack)
-    colored_knight_threats = knight_threats(colored_pieces[:knight], @knight_attacks)
-    colored_king_threats = king_threats(colored_pieces[:king], @king_attacks)
-    nonray_threats[:pawn] = colored_pawn_threats 
-    nonray_threats[:knight] = colored_knight_threats
-    nonray_threats[:king] = colored_king_threats
-    nonray_threats
-  end
-
   # Generates the bitboard of blocks/captures needed to protect the king, and
   # the number of enemy pieces checking the king.
   def find_king_attackers(king_color)
     colored_king_BB = @piece_BB[:king] & @color_BB[king_color]
     enemy_color = get_enemy_color(king_color)
-    king_threats = get_threats_by_color(enemy_color)
+    enemy_pieces = get_pieces_by_color(enemy_color)
+    king_threats = get_threats_by_color(enemy_pieces, enemy_color, @occupied_BB)
 
     king_attackers_info = {num_threats: 0, block_capture_BB: 0}
     king_threats.values.each do |threat_hash|
@@ -352,7 +297,8 @@ class Chessboard
   # Returns true if a piece of a given color can move to a square on the given
   # bitboard, and returns false otherwise
   def no_legal_move_to_bitboard?(bitboard, color)
-    self_color_moves = get_threats_by_color(color)
+    colored_pieces = get_pieces_by_color(color)
+    self_color_moves = get_threats_by_color(colored_pieces, color, @occupied_BB)
     self_color_moves.each do |piece, threat_hash| 
       next if threat_hash.empty?
       threat_hash.each do |square, threat_BB|
@@ -416,7 +362,8 @@ class Chessboard
 
   def king_pinned?(color)
     enemy_color = get_enemy_color(color)
-    threat_hash = get_threats_by_color(enemy_color)
+    enemy_pieces = get_pieces_by_color(enemy_color)
+    threat_hash = get_threats_by_color(enemy_pieces, enemy_color, @occupied_BB)
     threat_BB = threat_hash_to_all_threat_BB(threat_hash)
     self_color_BB = get_occupied_by_color(color)
     illegal_king_move_BB = threat_BB | self_color_BB
