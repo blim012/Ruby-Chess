@@ -44,6 +44,41 @@ module Castle
     true
   end
 
+  def update_castleable(move)
+    if move.piece == :rook
+      remove_castleable(:queen_side, move.color) if move.from_offset == 56 || move.from_offset == 0
+      remove_castleable(:king_side, move.color) if move.from_offset == 63 || move.from_offset == 7 
+    else # king
+      remove_castleable(:king_side, move.color)
+      remove_castleable(:queen_side, move.color)
+    end
+  end
+
+  def set_castle_attr(move)
+    side = get_castle_side(move)
+    @king_src = (move.color == :white ? 60 : 4)
+    @king_dest = (side == :king_side ? @king_src + 2 : @king_src - 2)
+    set_rook_castle_attr(side, move.color)
+  end
+
+  def get_king_castle_move(color)
+    Move.new(@king_src, @king_dest, :king, color)
+  end
+
+  def get_rook_castle_move(color)
+    Move.new(@rook_src, @rook_dest, :rook, color)
+  end
+
+  private
+
+  def get_castle_side(move)
+    if move.color == :white
+      return move.to_offset == 62 ? :king_side : :queen_side
+    else
+      return side = (move.to_offset == 6 ? :king_side : :queen_side)
+    end
+  end
+
   def remove_castleable(castle_side, color)
     if castle_side == :king_side
       if color == :white
@@ -57,31 +92,6 @@ module Castle
       else
         @b_queen_side = false
       end
-    end
-  end
-
-  def set_castle_attr(move)
-    side = get_castle_side
-    @king_src = (move.color == :white ? 60 : 4)
-    @king_dest = (side == :king_side ? @king_src + 2 : @king_src - 2)
-    set_rook_castle_attr(side, move.color)
-  end
-
-  def get_king_castle_move(color)
-    Move.new(@king_src, @king_dest, :king, color)
-  end
-
-  def get_rook_castle_move
-    Move.new(@rook_src, @rook_dest, :rook, color)
-  end
-
-  private
-
-  def get_castle_side(move)
-    if move.color == :white
-      return move.to_offset == 62 ? :king_side : :queen_side
-    else
-      return side = (move.to_offset == 6 ? :king_side : :queen_side)
     end
   end
 

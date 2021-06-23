@@ -3,12 +3,14 @@ require './lib/nonray_attack.rb'
 require './lib/ray_attack.rb'
 require './lib/searchable.rb'
 require './lib/move.rb'
+require './lib/castle.rb'
 
 class Chessboard
   include Gen_Pseudo_Moves
   include Ray_Attack
   include Nonray_Attack
   include Searchable
+  include Castle
 
   attr_accessor :piece_BB, :color_BB, :occupied_BB
 
@@ -56,6 +58,7 @@ class Chessboard
     @b_pawn_attacks = gen_b_pawn_attacks
 
     @prev_move = nil
+    @special_move = nil
   end
 
   # Returns the piece and color that is residing on a square
@@ -80,6 +83,33 @@ class Chessboard
     cap_piece_type = find_piece(dest)
     
     Move.new(src, dest, piece_type[0], piece_type[1], cap_piece_type[0], cap_piece_type[1])
+  end
+
+  def move_piece(move)
+    return false unless legal_move?(move)
+    if @special_move.nil?
+      make_move(move)
+    else 
+      move_piece_special(move)
+    end
+    if in_check?(move.color)
+      undo_move(move)
+      return false
+    end
+    update_castleable(move) if move.piece == :rook || move.piece == :king
+    true
+  end
+
+  def move_piece_special(move)
+    if @special_move == :castle
+      king_move = get_king_castle_move(move.color)
+      rook_move = get_rook_castle_move(move.color)
+      make_move(king_move)
+      make_move(rook_move)
+      @special_move = nil
+    else # en passant
+
+    end
   end
 
   def legal_move?(move)
@@ -116,11 +146,24 @@ class Chessboard
   end
 
   def legal_king_move?(move)
+    return legal_castle?(move) if castle_move?(move)
     self_color_BB = get_occupied_by_color(move.color)
     to_BB = 1 << (63 - move.to_offset)
     return true if (@king_attacks[move.from_offset] & to_BB != 0) &&
                    (to_BB & self_color_BB == 0)
     false
+  end
+
+  def legal_castle?(move)
+    enemy_color = get_enemy_color(move.color)
+    threat_hash = get_threats_by_color(enemy_color)
+    enemy_threat_BB = threat_hash_to_all_threat_BB(threat_hash)
+    return false unless castleable?(move, @occupied_BB, enemy_threat_BB)
+    set_castle_attr(move)
+    remove_castleable(:king_side, move.color)
+    remove_castleable(:queen_side, move.color)
+    @special_move = :castle
+    true
   end
 
   def legal_pawn_move?(move)
