@@ -21,6 +21,7 @@ class Game
       switch_color
     end
 
+    switch_color
     puts "#{@color} wins!"
   end
 
