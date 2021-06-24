@@ -29,16 +29,29 @@ class Game
 
   def get_input
     input = nil
-    while input.nil?
+    loop do
       print "#{@color}, enter your move: " 
       input = check_input(gets.chomp.downcase)
+      break unless input.nil?
     end
     [convert_to_sqaure(input[0, 2]), convert_to_sqaure(input[2, 4])]
   end
 
   def check_input(input)
     input = input.downcase.gsub(/\s+/, '')
-    return nil if input.match(/[a-h][1-8][a-h][1-8]/).nil?
+    input = convert_castle_to_move(input)
+    return input unless input.match(/[a-h][1-8][a-h][1-8]/).nil?
+    puts 'Invalid move, try again' 
+    nil
+  end
+
+  def convert_castle_to_move(input)
+    case input
+    when 'ck'
+      return (@color == :white ? 'e1g1' : 'e8g8')
+    when 'cq'
+      return (@color == :white ? 'e1c1' : 'e8c8')
+    end
     input
   end
 
